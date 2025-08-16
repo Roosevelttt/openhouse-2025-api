@@ -1,0 +1,18 @@
+# Binaries
+/bin/
+/build/
+/dist/
+*.exe
+*.out
+*.test
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+
+# Env & logs
+.env
+*.log
+coverage/
+
