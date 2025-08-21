@@ -1,0 +1,47 @@
+package repositories
+
+import (
+	"context"
+	"database/sql"
+
+	"openhouse-2025-api/internal/models"
+)
+
+type ParticipantsRepository struct{ db *sql.DB }
+
+func NewParticipantsRepository(db *sql.DB) *ParticipantsRepository {
+	return &ParticipantsRepository{db: db}
+}
+
+func (r *ParticipantsRepository) List(ctx context.Context) ([]models.Participant, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT u.id ,u.nrp, u.name, line_id, phone, uk.name AS ukm_name, dr.payment, dr.file_validated, dr.payment_validated, dr.created_at, dr.isInvited FROM users u 
+		    JOIN detail_registrations dr ON u.nrp=dr.nrp
+		JOIN ukms uk ON uk.id=dr.ukm_id
+		`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var res []models.Participant
+	for rows.Next() {
+		var p models.Participant
+		if err := rows.Scan(
+			&p.ID,
+			&p.NRP,
+			&p.Name,
+			&p.LineID,
+			&p.Phone,
+			&p.UkmName,
+			&p.Payment,
+			&p.FileValidated,
+			&p.PaymentValidated,
+			&p.CreatedAt,
+			&p.IsInvited,
+		); err != nil {
+			return nil, err
+		}
+		res = append(res, p)
+	}
+	return res, rows.Err()
+}

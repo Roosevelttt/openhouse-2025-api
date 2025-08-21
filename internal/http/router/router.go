@@ -23,8 +23,8 @@ func New(cfg *config.Config) http.Handler {
 		// api.GET("/auth/google/callback", s.Auth.GoogleCallback)
 
 		api.GET("/ukms", s.Ukm.List)
+		api.GET("/participants", s.Participants.List)
 	}
 
 	return r
 }
-

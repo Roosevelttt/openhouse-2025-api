@@ -49,3 +49,16 @@ type DetailRegistration struct {
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
 }
 
+type Participant struct {
+	ID               string     `db:"id" json:"id"`
+	NRP              string     `db:"nrp" json:"nrp"`
+	Name             string     `db:"name" json:"name"`
+	LineID           string     `db:"line_id" json:"line_id"`
+	Phone            string     `db:"phone" json:"phone"`
+	UkmName          string     `db:"ukm_name" json:"ukm_name"`
+	Payment          *string    `db:"payment" json:"payment"`
+	FileValidated    int        `db:"file_validated" json:"file_validated"`
+	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
+	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
+	IsInvited        int        `db:"isInvited" json:"is_invited"`
+}
