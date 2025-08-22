@@ -3,10 +3,11 @@ package router
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"openhouse-2025-api/internal/config"
 	"openhouse-2025-api/internal/http/server"
 	"openhouse-2025-api/internal/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func New(cfg *config.Config) http.Handler {
@@ -24,6 +25,7 @@ func New(cfg *config.Config) http.Handler {
 
 		api.GET("/ukms", s.Ukm.List)
 		api.GET("/participants", s.Participants.List)
+		api.POST("/payment/validate", s.Payment.Validate)
 	}
 
 	return r

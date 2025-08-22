@@ -15,7 +15,7 @@ func NewParticipantsRepository(db *sql.DB) *ParticipantsRepository {
 
 func (r *ParticipantsRepository) List(ctx context.Context) ([]models.Participant, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT u.id ,u.nrp, u.name, line_id, phone, uk.name AS ukm_name, dr.payment, dr.file_validated, dr.payment_validated, dr.created_at, dr.isInvited FROM users u 
+		SELECT u.id ,u.nrp, u.name, line_id, phone, uk.id AS ukm_id, uk.name AS ukm_name, dr.payment, dr.file_validated, dr.payment_validated, dr.created_at, dr.isInvited FROM users u 
 		    JOIN detail_registrations dr ON u.nrp=dr.nrp
 		JOIN ukms uk ON uk.id=dr.ukm_id
 		`)
@@ -32,6 +32,7 @@ func (r *ParticipantsRepository) List(ctx context.Context) ([]models.Participant
 			&p.Name,
 			&p.LineID,
 			&p.Phone,
+			&p.UkmId,
 			&p.UkmName,
 			&p.Payment,
 			&p.FileValidated,
