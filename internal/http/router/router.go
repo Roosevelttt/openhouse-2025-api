@@ -7,6 +7,7 @@ import (
 	"openhouse-2025-api/internal/config"
 	"openhouse-2025-api/internal/http/server"
 	"openhouse-2025-api/internal/middleware"
+	// "openhouse-2025-api/internal/http/authentication"
 )
 
 func New(cfg *config.Config) http.Handler {
@@ -21,6 +22,9 @@ func New(cfg *config.Config) http.Handler {
 	{
 		// api.GET("/auth/google", s.Auth.GoogleLogin)
 		// api.GET("/auth/google/callback", s.Auth.GoogleCallback)
+
+		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
+		api.GET("auth/google/callback", s.Auth.OAuthCallback)
 
 		api.GET("/ukms", s.Ukm.List)
 	}

@@ -1,30 +1,43 @@
 package handlers
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"openhouse-2025-api/internal/services"
+    "github.com/gin-gonic/gin"
+    "openhouse-2025-api/internal/services"
 )
 
-type AuthHandler struct {
-	service *services.AuthService
-}
-
+// var r = gin.Default()
+type AuthHandler struct { service *services.AuthService }
 func NewAuthHandler(s *services.AuthService) *AuthHandler { return &AuthHandler{service: s} }
 
-func (h *AuthHandler) GoogleLogin(c *gin.Context) {
-	url := h.service.GetGoogleAuthURL()
-	c.Redirect(http.StatusFound, url)
+
+func (h *AuthHandler) BeginGoogleAuth(c *gin.Context) {
+
+    h.service.BeginGoogleAuth(c) 
+    
 }
 
-func (h *AuthHandler) GoogleCallback(c *gin.Context) {
-	code := c.Query("code")
-	token, user, err := h.service.HandleGoogleCallback(c.Request.Context(), code)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+func (h *AuthHandler) OAuthCallback(c *gin.Context) {
+
+    h.service.OAuthCallback(c) 
+    
 }
 
+// func  OAuthCallback(c  *gin.Context) {
+
+//     q  :=  c.Request.URL.Query()
+//     q.Add("provider", "google")
+//     c.Request.URL.RawQuery  =  q.Encode()
+//     user, err  :=  gothic.CompleteUserAuth(c.Writer, c.Request)
+//     if  err  !=  nil {
+//         c.AbortWithError(http.StatusInternalServerError, err)
+//         return
+//     }
+//     res, err  :=  json.Marshal(user)
+//     if  err  !=  nil {
+//         c.AbortWithError(http.StatusInternalServerError, err)
+//         return
+//     }
+
+//     jsonString  :=  string(res)
+//     c.JSON(http.StatusAccepted, jsonString)
+// }
