@@ -2,12 +2,13 @@ package router
 
 import (
 	"net/http"
+	// "log"
+	// "os"
 
 	"github.com/gin-gonic/gin"
 	"openhouse-2025-api/internal/config"
 	"openhouse-2025-api/internal/http/server"
 	"openhouse-2025-api/internal/middleware"
-	// "openhouse-2025-api/internal/http/authentication"
 )
 
 func New(cfg *config.Config) http.Handler {
@@ -15,6 +16,12 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
+	r.Use(middleware.SessionManager())
+	// if os.Getenv("SESSION_HASH_KEY") == "" {
+    //     log.Fatal("SESSION_HASH_KEY is still not set. Check your .env file or environment.")
+    // }
+	// log.Fatal(os.Getenv("SESSION_HASH_KEY"))
+	
 
 	s := server.NewServer(cfg)
 

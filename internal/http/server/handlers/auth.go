@@ -3,6 +3,9 @@ package handlers
 import (
     "github.com/gin-gonic/gin"
     "openhouse-2025-api/internal/services"
+
+    // "net/http"
+    // "github.com/gin-contrib/sessions"
 )
 
 // var r = gin.Default()
@@ -22,22 +25,3 @@ func (h *AuthHandler) OAuthCallback(c *gin.Context) {
     
 }
 
-// func  OAuthCallback(c  *gin.Context) {
-
-//     q  :=  c.Request.URL.Query()
-//     q.Add("provider", "google")
-//     c.Request.URL.RawQuery  =  q.Encode()
-//     user, err  :=  gothic.CompleteUserAuth(c.Writer, c.Request)
-//     if  err  !=  nil {
-//         c.AbortWithError(http.StatusInternalServerError, err)
-//         return
-//     }
-//     res, err  :=  json.Marshal(user)
-//     if  err  !=  nil {
-//         c.AbortWithError(http.StatusInternalServerError, err)
-//         return
-//     }
-
-//     jsonString  :=  string(res)
-//     c.JSON(http.StatusAccepted, jsonString)
-// }
