@@ -8,6 +8,7 @@ import (
 )
 
 type Server struct {
+	Session *handlers.SessionHandler
 	Auth *handlers.AuthHandler
 	Ukm  *handlers.UkmHandler
 }
@@ -19,10 +20,12 @@ func NewServer(cfg *config.Config) *Server {
 	ukmRepo := repositories.NewUkmRepository(db)
 	regRepo := repositories.NewRegistrationRepository(db)
 
+	sessionSvc := services.NewSessionService()
 	authSvc := services.NewAuthService(cfg, userRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
 
 	return &Server{
+		Session: handlers.NewSessionHandler(sessionSvc),
 		Auth: handlers.NewAuthHandler(authSvc),
 		Ukm:  handlers.NewUkmHandler(ukmSvc),
 	}

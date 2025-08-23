@@ -21,36 +21,13 @@ func SessionManager() gin.HandlerFunc {
     store := cookie.NewStore([]byte(hashKey))
     store.Options(sessions.Options{
         MaxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+        // KELLY LIHAT INI LAGI
+        Path:     "/",
+        HttpOnly: true,  
+        SameSite: 0, 
+		Secure:   true,
     })
     gothic.Store = store
 
     return sessions.Sessions("mysession", store)
 }
-
-// func main() {
-//     r := gin.Default()
-//     store := cookie.NewStore([]byte("secret"))
-//     r.Use(sessions.Sessions("mysession", store))
-//     // ...
-// }
-
-// import (
-
-//     "net/http"
-//     "github.com/gin-contrib/sessions"
-// 	"github.com/gin-gonic/gin"
-// )
-
-// func Authentication() gin.HandlerFunc {
-//     return func(c *gin.Context) {
-//         session := sessions.Default(c)
-//         sessionID := session.Get("id")
-
-//         if sessionID == nil {
-//             c.JSON(http.StatusNotFound, gin.H{
-//                 "message": "unauthorized",
-//             })
-//             c.Abort()
-//         }
-//     }
-// }

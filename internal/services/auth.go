@@ -1,7 +1,7 @@
 	package services
 
 	import (
-		// "encoding/json"
+		"strings"
 		"net/http"
 		"os"
 
@@ -13,10 +13,7 @@
 		"openhouse-2025-api/internal/config"
 		"openhouse-2025-api/internal/repositories"
 
-		// for session
 		"github.com/gin-contrib/sessions"
-		// gsessions "github.com/gorilla/sessions"
-		"strings"
 	)
 
 	type AuthService struct {
@@ -62,6 +59,7 @@
 		nrp := strings.Split(email, "@")[0]
 		
 		session := sessions.Default(c)
+		session.Set("role", "user")
 		session.Set("nrp", nrp)
 
 		session.Save()
@@ -70,7 +68,7 @@
 		// sessionData := session.Get("nrp")
 		// c.JSON(http.StatusAccepted, sessionData)
 
-		// gw gtw mau arahin ke mana
+		// gw gtw mau arahin ke mana hehe
 		c.Redirect(http.StatusFound, os.Getenv("CORS_ORIGINS") + "")
 		
 	}
