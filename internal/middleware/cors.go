@@ -18,6 +18,7 @@ func CORS(cfg *config.Config) gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", allow)
 		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Credentials", "true")
 		if c.Request.Method == "OPTIONS" { c.AbortWithStatus(204); return }
 		c.Next()
 	}

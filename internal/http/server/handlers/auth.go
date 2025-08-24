@@ -1,30 +1,27 @@
 package handlers
 
 import (
-	"net/http"
+    "github.com/gin-gonic/gin"
+    "openhouse-2025-api/internal/services"
 
-	"github.com/gin-gonic/gin"
-	"openhouse-2025-api/internal/services"
+    // "net/http"
+    // "github.com/gin-contrib/sessions"
 )
 
-type AuthHandler struct {
-	service *services.AuthService
-}
-
+// var r = gin.Default()
+type AuthHandler struct { service *services.AuthService }
 func NewAuthHandler(s *services.AuthService) *AuthHandler { return &AuthHandler{service: s} }
 
-func (h *AuthHandler) GoogleLogin(c *gin.Context) {
-	url := h.service.GetGoogleAuthURL()
-	c.Redirect(http.StatusFound, url)
+
+func (h *AuthHandler) BeginGoogleAuth(c *gin.Context) {
+
+    h.service.BeginGoogleAuth(c) 
+    
 }
 
-func (h *AuthHandler) GoogleCallback(c *gin.Context) {
-	code := c.Query("code")
-	token, user, err := h.service.HandleGoogleCallback(c.Request.Context(), code)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+func (h *AuthHandler) OAuthCallback(c *gin.Context) {
+
+    h.service.OAuthCallback(c) 
+    
 }
 

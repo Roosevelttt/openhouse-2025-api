@@ -9,6 +9,7 @@ import (
 )
 
 type Server struct {
+	Session *handlers.SessionHandler
 	Auth         *handlers.AuthHandler
 	Ukm          *handlers.UkmHandler
 	Participants *handlers.ParticipantsHandler
@@ -33,6 +34,7 @@ func NewServer(cfg *config.Config) *Server {
 	paymentRepo := repositories.NewPaymentRepository(gormDB)
 
 	// --- Services ---
+	sessionSvc := services.NewSessionService()
 	authSvc := services.NewAuthService(cfg, userRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
 	participantsSvc := services.NewParticipantsService(participantsRepo)
@@ -40,6 +42,7 @@ func NewServer(cfg *config.Config) *Server {
 
 	// --- Handlers ---
 	return &Server{
+		Session: handlers.NewSessionHandler(sessionSvc),
 		Auth:         handlers.NewAuthHandler(authSvc),
 		Ukm:          handlers.NewUkmHandler(ukmSvc),
 		Participants: handlers.NewParticipantsHandler(participantsSvc),
