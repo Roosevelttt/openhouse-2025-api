@@ -16,3 +16,8 @@
 *.log
 coverage/
 
+# Uploads
+uploads/
+
+
+

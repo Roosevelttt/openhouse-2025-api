@@ -9,11 +9,12 @@ import (
 )
 
 type Server struct {
-	Session *handlers.SessionHandler
+	Session      *handlers.SessionHandler
 	Auth         *handlers.AuthHandler
 	Ukm          *handlers.UkmHandler
 	Participants *handlers.ParticipantsHandler
 	Payment      *handlers.PaymentHandler
+	Registration *handlers.RegistrationHandler
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -42,10 +43,11 @@ func NewServer(cfg *config.Config) *Server {
 
 	// --- Handlers ---
 	return &Server{
-		Session: handlers.NewSessionHandler(sessionSvc),
+		Session:      handlers.NewSessionHandler(sessionSvc),
 		Auth:         handlers.NewAuthHandler(authSvc),
 		Ukm:          handlers.NewUkmHandler(ukmSvc),
 		Participants: handlers.NewParticipantsHandler(participantsSvc),
 		Payment:      handlers.NewPaymentHandler(paymentSvc),
+		Registration: handlers.NewRegistrationHandler(regRepo),
 	}
 }

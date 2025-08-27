@@ -43,12 +43,13 @@ type DetailRegistration struct {
 	ID               string     `gorm:"primaryKey;column:id" db:"id" json:"id"`
 	NRP              string     `gorm:"column:nrp" db:"nrp" json:"nrp"`
 	UkmID            string     `gorm:"column:ukm_id" db:"ukm_id" json:"ukm_id"`
-	Payment          int        `gorm:"column:payment" db:"payment" json:"payment"`
+	Payment          string     `gorm:"column:payment" db:"payment" json:"payment"`
 	Code             string     `gorm:"column:code" db:"code" json:"code"`
 	DriveURL         string     `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `gorm:"column:payment_validated" db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `gorm:"column:created_at" db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt        *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
 }
 
 type Participant struct {
