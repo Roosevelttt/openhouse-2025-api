@@ -18,7 +18,6 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
 	r.Use(middleware.SessionManager())
-	
 
 	s := server.NewServer(cfg)
 
@@ -27,17 +26,17 @@ func New(cfg *config.Config) http.Handler {
 
 		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
 		api.GET("auth/google/callback", s.Auth.OAuthCallback)
-		
 
-		api.GET("/ukms", s.Ukm.List)
-		api.GET("/participants", s.Participants.List)
-		api.POST("/payment/validate", s.Payment.Validate)
+		api.Use(middleware.Authentication("user"))
+		{
+			api.POST("/session/values", s.Session.GetValues)
 
-		
-		api.Use(middleware.Authentication("user")) 
-        {
-            api.POST("/session/values", s.Session.GetValues)
-        }
+			//TODO pakai user "admin" sama middleware UKM :)
+			api.GET("/ukms", s.Ukm.List)
+			api.GET("/participants", s.Participants.List)
+			api.POST("/payment/validate", s.Validation.Validate)
+			api.POST("/payment/reject", s.Validation.Reject)
+		}
 	}
 
 	return r
