@@ -41,7 +41,7 @@ func (r *UkmRepository) FindByID(ctx context.Context, ukmID string) (*models.Ukm
 	// For primary key lookups, GORM's .First() method is the most idiomatic and efficient.
 	// It's equivalent to `WHERE id = ? LIMIT 1`.
 	// It will automatically return `gorm.ErrRecordNotFound` if no record matches the ID.
-	result := r.db.WithContext(ctx).First(&ukm, ukmID)
+	result := r.db.WithContext(ctx).Where("id = ?", ukmID).First(&ukm)
 
 	if result.Error != nil {
 		return nil, result.Error
