@@ -122,14 +122,10 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 
 	// Map the service status to a JSON response
 	switch status {
-	case services.ValidationSuccess:
+	case services.RejectionSuccess:
 		c.JSON(http.StatusOK, gin.H{"message": "true"})
-	case services.ValidationAlreadyDone:
+	case services.RejectionAlreadyDone:
 		c.JSON(http.StatusConflict, gin.H{"message": "false"})
-	case services.ValidationFileRejected:
-		c.JSON(http.StatusForbidden, gin.H{"message": "warning"})
-	case services.ValidationFileNotReviewed:
-		c.JSON(http.StatusPreconditionFailed, gin.H{"message": "not_yet"})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unknown validation status"})
 	}
