@@ -39,7 +39,7 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context) (*bytes.B
 	// 3. Define and write the header row
 	headers := []string{
 		"NRP", "Name", "Line ID", "Phone", "UKM",
-		"Payment Status", "File Status", "Payment Validated", "Registered At", "Invited",
+		"File Status", "Payment Validated", "Registered At", "Invited",
 	}
 	for i, header := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
@@ -50,13 +50,14 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context) (*bytes.B
 	for i, p := range participants {
 		rowNum := i + 2 // Start from row 2
 
+		// Gapakai file payment
 		// Check if p.Payment is nil before dereferencing it
-		var paymentStr string
-		if p.Payment != nil {
-			paymentStr = *p.Payment
-		} else {
-			paymentStr = "N/A" // Or "" for an empty cell
-		}
+		//var paymentStr string
+		//if p.Payment != nil {
+		//	paymentStr = *p.Payment
+		//} else {
+		//	paymentStr = "N/A" // Or "" for an empty cell
+		//}
 
 		// Check if p.CreatedAt is nil before calling .Format()
 		var createdAtStr string
@@ -71,11 +72,11 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context) (*bytes.B
 		f.SetCellValue(sheetName, fmt.Sprintf("C%d", rowNum), p.LineID)
 		f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), p.Phone)
 		f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), p.UkmName)
-		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), paymentStr) // Assuming Payment is a *string
-		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), mapFileStatus(p.FileValidated))
-		f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), mapPaymentStatus(p.PaymentValidated))
-		f.SetCellValue(sheetName, fmt.Sprintf("I%d", rowNum), createdAtStr)
-		f.SetCellValue(sheetName, fmt.Sprintf("J%d", rowNum), strconv.Itoa(p.IsInvited))
+		//f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), paymentStr) // Assuming Payment is a *string
+		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), mapFileStatus(p.FileValidated))
+		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), mapPaymentStatus(p.PaymentValidated))
+		f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), createdAtStr)
+		f.SetCellValue(sheetName, fmt.Sprintf("I%d", rowNum), strconv.Itoa(p.IsInvited))
 	}
 
 	// Set active sheet of the workbook.
