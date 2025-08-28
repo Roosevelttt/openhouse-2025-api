@@ -12,12 +12,16 @@ type User struct {
 }
 
 type Ukm struct {
-	ID          string `gorm:"primaryKey;column:id" db:"id" json:"id"`
-	Name        string `gorm:"column:name" db:"name" json:"name"`
-	Slug        string `gorm:"column:slug" db:"slug" json:"slug"`
-	CurrentSlot int    `gorm:"column:current_slot" db:"current_slot" json:"current_slot"`
-	MaxSlot     int    `gorm:"column:max_slot" db:"max_slot" json:"max_slot"`
-	RegistFee   int    `gorm:"column:regist_fee" db:"regist_fee" json:"regist_fee"`
+	ID          string  `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	Name        string  `gorm:"column:name" db:"name" json:"name"`
+	Slug        string  `gorm:"column:slug" db:"slug" json:"slug"`
+	CurrentSlot int     `gorm:"column:current_slot" db:"current_slot" json:"current_slot"`
+	MaxSlot     int     `gorm:"column:max_slot" db:"max_slot" json:"max_slot"`
+	RegistFee   int     `gorm:"column:regist_fee" db:"regist_fee" json:"regist_fee"`
+	Description string  `gorm:"column:description" db:"description" json:"description"`
+	LogoURL     string  `gorm:"column:logo_url" db:"logo_url" json:"logo_url"`
+	PosterURL   *string `gorm:"column:poster_url" db:"poster_url" json:"poster_url"`
+	Groupchat   string  `gorm:"column:groupchat" db:"groupchat" json:"groupchat"`
 }
 
 type Division struct {
