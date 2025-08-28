@@ -36,6 +36,7 @@ func New(cfg *config.Config) http.Handler {
 			api.GET("/participants", s.Participants.List)
 			api.POST("/payment/validate", s.Validation.Validate)
 			api.POST("/payment/reject", s.Validation.Reject)
+			api.GET("/export/participants", s.Export.ExportParticipants)
 		}
 	}
 

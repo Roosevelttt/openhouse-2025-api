@@ -14,6 +14,7 @@ type Server struct {
 	Ukm          *handlers.UkmHandler
 	Participants *handlers.ParticipantsHandler
 	Validation   *handlers.PaymentHandler
+	Export       *handlers.ExportHandler
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -39,6 +40,7 @@ func NewServer(cfg *config.Config) *Server {
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
 	participantsSvc := services.NewParticipantsService(participantsRepo)
 	validationSvc := services.NewValidationService(gormDB, validationRepo, userRepo, ukmRepo)
+	exportSvc := services.NewExportService(participantsRepo)
 
 	// --- Handlers ---
 	return &Server{
@@ -47,5 +49,6 @@ func NewServer(cfg *config.Config) *Server {
 		Ukm:          handlers.NewUkmHandler(ukmSvc),
 		Participants: handlers.NewParticipantsHandler(participantsSvc),
 		Validation:   handlers.NewPaymentHandler(validationSvc),
+		Export:       handlers.NewExportHandler(exportSvc),
 	}
 }
