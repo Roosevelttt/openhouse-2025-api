@@ -55,6 +55,10 @@ func (s *ValidationService) ProcessValidation(ctx context.Context, admin AdminCo
 
 	switch validationType {
 	case "file":
+		// sudah di reject
+		if detailReg.FileValidated == 2 || detailReg.PaymentValidated == 2 {
+			return ValidationFileRejected, nil // Already rejected
+		}
 		// Logic for validating a selection file
 		if detailReg.FileValidated == 1 {
 			return ValidationAlreadyDone, nil // Already accepted
@@ -67,15 +71,16 @@ func (s *ValidationService) ProcessValidation(ctx context.Context, admin AdminCo
 		return ValidationSuccess, nil
 
 	case "payment":
+		// sudah di reject
+		if detailReg.FileValidated == 2 || detailReg.PaymentValidated == 2 {
+			return ValidationFileRejected, nil
+		}
 		// This is the original logic from ValidatePayment
 		if detailReg.FileValidated == 0 {
 			return ValidationFileNotReviewed, nil
 		}
 		if detailReg.PaymentValidated == 1 {
 			return ValidationAlreadyDone, nil
-		}
-		if detailReg.FileValidated == 2 {
-			return ValidationFileRejected, nil
 		}
 
 		// Update the record to '1' (Accepted)
