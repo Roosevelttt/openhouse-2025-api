@@ -60,6 +60,7 @@ type Participant struct {
 	UkmId            string     `db:"ukm_id" json:"ukm_id"`
 	UkmName          string     `db:"ukm_name" json:"ukm_name"`
 	Payment          *string    `db:"payment" json:"payment"`
+	DriveURL         *string    `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
