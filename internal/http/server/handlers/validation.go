@@ -70,10 +70,11 @@ func (h *PaymentHandler) Validate(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "true"})
 	case services.ValidationAlreadyDone:
 		c.JSON(http.StatusConflict, gin.H{"message": "false"})
-	case services.ValidationFileRejected:
+	case services.RejectionAlreadyDone:
 		c.JSON(http.StatusForbidden, gin.H{"message": "warning"})
-	case services.ValidationFileNotReviewed:
-		c.JSON(http.StatusPreconditionFailed, gin.H{"message": "not_yet"})
+	// Ga dipakai
+	//case services.ValidationFileNotReviewed:
+	//	c.JSON(http.StatusPreconditionFailed, gin.H{"message": "not_yet"})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unknown validation status"})
 	}
@@ -126,6 +127,8 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "true"})
 	case services.RejectionAlreadyDone:
 		c.JSON(http.StatusConflict, gin.H{"message": "false"})
+	case services.ValidationAlreadyDone:
+		c.JSON(http.StatusConflict, gin.H{"message": "validated"})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unknown validation status"})
 	}

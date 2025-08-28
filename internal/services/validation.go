@@ -54,34 +54,35 @@ func (s *ValidationService) ProcessValidation(ctx context.Context, admin AdminCo
 	}
 
 	switch validationType {
-	case "file":
-		// sudah di reject
-		if detailReg.FileValidated == 2 || detailReg.PaymentValidated == 2 {
-			return ValidationFileRejected, nil // Already rejected
-		}
-		// Logic for validating a selection file
-		if detailReg.FileValidated == 1 {
-			return ValidationAlreadyDone, nil // Already accepted
-		}
-		// Update the record to '1' (Accepted)
-		if err := s.statusRepo.UpdateStatus(s.db, nrp, ukmID, "file_validated", 1); err != nil {
-			return "", err
-		}
-		go s.logValidationAction(admin, detailReg, "selection file")
-		return ValidationSuccess, nil
+	//case "file":
+	//	// sudah di reject
+	//	if detailReg.FileValidated == 2 || detailReg.PaymentValidated == 2 {
+	//		return ValidationFileRejected, nil // Already rejected
+	//	}
+	//	// Logic for validating a selection file
+	//	if detailReg.FileValidated == 1 {
+	//		return ValidationAlreadyDone, nil // Already accepted
+	//	}
+	//	// Update the record to '1' (Accepted)
+	//	if err := s.statusRepo.UpdateStatus(s.db, nrp, ukmID, "file_validated", 1); err != nil {
+	//		return "", err
+	//	}
+	//	go s.logValidationAction(admin, detailReg, "selection file")
+	//	return ValidationSuccess, nil
 
 	case "payment":
-		// sudah di reject
-		if detailReg.FileValidated == 2 || detailReg.PaymentValidated == 2 {
-			return ValidationFileRejected, nil
-		}
-		// This is the original logic from ValidatePayment
-		if detailReg.FileValidated == 0 {
-			return ValidationFileNotReviewed, nil
-		}
+		// sudah di accept
 		if detailReg.PaymentValidated == 1 {
 			return ValidationAlreadyDone, nil
 		}
+		// sudah di reject
+		if detailReg.PaymentValidated == 2 {
+			return RejectionAlreadyDone, nil
+		}
+		// This is the original logic from ValidatePayment
+		//if detailReg.FileValidated == 0 {
+		//	return ValidationFileNotReviewed, nil
+		//}
 
 		// Update the record to '1' (Accepted)
 		if err := s.statusRepo.UpdateStatus(s.db, nrp, ukmID, "payment_validated", 1); err != nil {
@@ -107,17 +108,23 @@ func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminCon
 
 	switch reqType {
 	case "payment":
+		if detailReg.PaymentValidated == 1 {
+			return ValidationAlreadyDone, nil
+		}
 		if detailReg.PaymentValidated == 2 {
 			return RejectionAlreadyDone, nil
 		}
 		fieldToUpdate = "payment_validated"
 		logFileType = "payment file"
-	case "file":
-		if detailReg.FileValidated == 2 {
-			return RejectionAlreadyDone, nil
-		}
-		fieldToUpdate = "file_validated"
-		logFileType = "selection file"
+	//case "file":
+	//	if detailReg.FileValidated == 1 || detailReg.PaymentValidated == 1 {
+	//		return ValidationAlreadyDone, nil
+	//	}
+	//	if detailReg.FileValidated == 2 {
+	//		return RejectionAlreadyDone, nil
+	//	}
+	//	fieldToUpdate = "file_validated"
+	//	logFileType = "selection file"
 	default:
 		return "", errors.New("invalid rejection type")
 	}
