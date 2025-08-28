@@ -76,7 +76,6 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context) (*bytes.B
 		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), mapFileStatus(p.FileValidated))
 		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), mapPaymentStatus(p.PaymentValidated))
 		f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), createdAtStr)
-		f.SetCellValue(sheetName, fmt.Sprintf("I%d", rowNum), strconv.Itoa(p.IsInvited))
 	}
 
 	// Set active sheet of the workbook.

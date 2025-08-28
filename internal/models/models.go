@@ -68,5 +68,4 @@ type Participant struct {
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
-	IsInvited        int        `db:"isInvited" json:"is_invited"`
 }
