@@ -28,15 +28,17 @@ type ValidationService struct {
 	statusRepo *repositories.ValidationRepository // Assuming a unified repository
 	userRepo   *repositories.UserRepository       // For logging
 	ukmRepo    *repositories.UkmRepository        // For logging
+	mailSvc    *MailService
 }
 
 // The constructor now accepts the DB handle and the unified StatusRepository.
-func NewValidationService(db *gorm.DB, statusRepo *repositories.ValidationRepository, userRepo *repositories.UserRepository, ukmRepo *repositories.UkmRepository) *ValidationService {
+func NewValidationService(db *gorm.DB, statusRepo *repositories.ValidationRepository, userRepo *repositories.UserRepository, ukmRepo *repositories.UkmRepository, mailSvc *MailService) *ValidationService {
 	return &ValidationService{
 		db:         db,
 		statusRepo: statusRepo,
 		userRepo:   userRepo,
 		ukmRepo:    ukmRepo,
+		mailSvc:    mailSvc,
 	}
 }
 
@@ -88,7 +90,7 @@ func (s *ValidationService) ProcessValidation(ctx context.Context, admin AdminCo
 		if err := s.statusRepo.UpdateStatus(s.db, nrp, ukmID, "payment_validated", 1); err != nil {
 			return "", err
 		}
-		go s.logValidationAction(admin, detailReg, "payment file")
+		go s.logValidationAction(admin, detailReg, "payment file", validationType)
 		return ValidationSuccess, nil
 
 	default:
@@ -97,7 +99,7 @@ func (s *ValidationService) ProcessValidation(ctx context.Context, admin AdminCo
 }
 
 // ProcessRejection is the method from the old RejectionService, now part of ValidationService.
-func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminContext, reqType, nrp, ukmID string) (string, error) {
+func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminContext, validationType, nrp, ukmID string) (string, error) {
 	var fieldToUpdate string
 	var logFileType string
 
@@ -106,7 +108,7 @@ func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminCon
 		return "", err // Handle not found or other db errors
 	}
 
-	switch reqType {
+	switch validationType {
 	case "payment":
 		if detailReg.PaymentValidated == 1 {
 			return ValidationAlreadyDone, nil
@@ -148,13 +150,13 @@ func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminCon
 	}
 
 	// Side effects like logging and sending emails happen after the database transaction is successful.
-	go s.logAndNotifyRejection(admin, nrp, ukmID, logFileType, reqType)
+	go s.logAndNotifyRejection(admin, nrp, ukmID, logFileType, validationType)
 
 	return RejectionSuccess, nil
 }
 
 // logValidationAction is now updated to accept the type of file being validated
-func (s *ValidationService) logValidationAction(admin AdminContext, detailReg *models.DetailRegistration, fileType string) {
+func (s *ValidationService) logValidationAction(admin AdminContext, detailReg *models.DetailRegistration, fileType string, mailType string) {
 	adminUkm, _ := s.ukmRepo.FindByID(context.Background(), admin.UkmID)
 	user, _ := s.userRepo.FindByNRP(context.Background(), detailReg.NRP)
 	dataUkm, _ := s.ukmRepo.FindByID(context.Background(), detailReg.UkmID)
@@ -164,6 +166,15 @@ func (s *ValidationService) logValidationAction(admin AdminContext, detailReg *m
 		fileType, // Use the dynamic file type
 		user.NRP, user.Name, dataUkm.Name)
 	log.Println(logMsg)
+
+	// --- Email Sending Logic ---
+	log.Printf("INFO: Sending acceptation email for %s to %s for UKM %s", mailType, user.NRP, dataUkm.Name)
+	err := s.mailSvc.SendNotificationEmail(user, dataUkm, true, dataUkm.Groupchat)
+	if err != nil {
+		log.Printf("ERROR: Failed to send acceptation email to %s: %v", detailReg.NRP, err)
+	} else {
+		log.Printf("INFO: Acceptation email sent successfully to %s", detailReg.NRP)
+	}
 }
 
 // logAndNotifyRejection is the helper for rejections.
@@ -178,6 +189,12 @@ func (s *ValidationService) logAndNotifyRejection(admin AdminContext, nrp, ukmID
 		user.NRP, user.Name, dataUkm.Name)
 	log.Println(logMsg)
 
-	// Email sending logic would be called here
-	log.Printf("INFO: Sending rejection email for %s to %s for UKM %s", mailType, user.NRP, dataUkm.Name)
+	// --- Email Sending Logic ---
+	log.Printf("INFO: Sending rejection email for %s to %s for UKM %s", mailType, user.NRP, dataUkm.Groupchat)
+	err := s.mailSvc.SendNotificationEmail(user, dataUkm, false, dataUkm.Slug)
+	if err != nil {
+		log.Printf("ERROR: Failed to send rejection email to %s: %v", nrp, err)
+	} else {
+		log.Printf("INFO: Rejection email sent successfully to %s", nrp)
+	}
 }

@@ -19,6 +19,11 @@ type Config struct {
 	GoogleRedirectURL  string
 	JWTSecret          string
 	CORSOrigins        string
+	SMTPHost           string
+	SMTPPort           string
+	SMTPUser           string
+	SMTPPass           string
+	SMTPFrom           string // e.g., "OpenHouse 2025 <no-reply@yourdomain.com>"
 }
 
 func getenv(key, def string) string {
@@ -44,6 +49,11 @@ func Load() *Config {
 		GoogleRedirectURL:  getenv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/auth/google/callback"),
 		JWTSecret:          getenv("JWT_SECRET", "change-me"),
 		CORSOrigins:        getenv("CORS_ORIGINS", "*"),
+		SMTPHost:           getenv("SMTP_HOST", ""),
+		SMTPPort:           getenv("SMTP_PORT", "587"),
+		SMTPUser:           getenv("SMTP_USER", ""),
+		SMTPPass:           getenv("SMTP_PASS", ""),
+		SMTPFrom:           getenv("SMTP_FROM", ""),
 	}
 	log.Printf("config loaded: HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.HTTPPort, cfg.DBHost, cfg.DBName)
 	return cfg
