@@ -1,9 +1,9 @@
 package services
 
 import (
-	"strings"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
@@ -69,17 +69,19 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 		session.Set("nrp", nrp)
 		session.Set("admin_id", admin.ID)
 		session.Set("admin_name", admin.Name)
-		
+
 		if admin.UkmID != nil {
 			session.Set("admin_ukm_id", *admin.UkmID)
 		} else {
 			session.Set("admin_ukm_id", nil)
 		}
-		
+
 		if admin.DivisionID != nil {
 			session.Set("admin_division_id", *admin.DivisionID)
+			session.Set("admin_division_slug", *admin.DivisionSlug)
 		} else {
 			session.Set("admin_division_id", nil)
+			session.Set("admin_division_slug", nil)
 		}
 	} else {
 		// Regular user

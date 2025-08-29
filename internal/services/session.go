@@ -59,21 +59,22 @@ func (s *SessionService) DebugSession(c *gin.Context) {
 
 	// Get all common session keys
 	sessionData := map[string]interface{}{
-		"role":              session.Get("role"),
-		"nrp":               session.Get("nrp"),
-		"admin_id":          session.Get("admin_id"),
-		"admin_name":        session.Get("admin_name"),
-		"admin_ukm_id":      session.Get("admin_ukm_id"),
-		"admin_division_id": session.Get("admin_division_id"),
+		"role":                session.Get("role"),
+		"nrp":                 session.Get("nrp"),
+		"admin_id":            session.Get("admin_id"),
+		"admin_name":          session.Get("admin_name"),
+		"admin_ukm_id":        session.Get("admin_ukm_id"),
+		"admin_division_id":   session.Get("admin_division_id"),
+		"admin_division_slug": session.Get("admin_division_slug"),
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"debug_session": sessionData,
-		"session_id":    session.ID(),
-		"has_session":   session.Get("nrp") != nil,
+		"debug_session":    sessionData,
+		"session_id":       session.ID(),
+		"has_session":      session.Get("nrp") != nil,
 		"is_authenticated": sessionData["role"] != nil,
-		"is_admin":      sessionData["role"] == "admin",
-		"is_user":       sessionData["role"] == "user",
-		"message":       "Session debug information",
+		"is_admin":         sessionData["role"] == "admin",
+		"is_user":          sessionData["role"] == "user",
+		"message":          "Session debug information",
 	})
 }
