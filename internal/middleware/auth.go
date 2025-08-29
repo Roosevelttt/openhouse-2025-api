@@ -52,13 +52,14 @@ func setContextFromSession(c *gin.Context, session sessions.Session, role string
 		adminNRP := session.Get("nrp")
 		adminID := session.Get("admin_id")
 		adminName := session.Get("admin_name")
-		
+
 		c.Set("admin_nrp", adminNRP)
 		c.Set("admin_id", adminID)
 		c.Set("admin_name", adminName)
-		
+
 		c.Set("admin_ukm_id", session.Get("admin_ukm_id"))
 		c.Set("admin_division_id", session.Get("admin_division_id"))
+		c.Set("admin_division_slug", session.Get("admin_division_slug")) // yaowoh rosss aku habis 2 jam debugging buat ini
 
 	case "user":
 		userNRP, ok := session.Get("nrp").(string)
