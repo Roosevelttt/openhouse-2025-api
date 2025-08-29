@@ -69,8 +69,18 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 		session.Set("nrp", nrp)
 		session.Set("admin_id", admin.ID)
 		session.Set("admin_name", admin.Name)
-		session.Set("admin_ukm_id", admin.UkmID)
-		session.Set("admin_division_id", admin.DivisionID)
+		
+		if admin.UkmID != nil {
+			session.Set("admin_ukm_id", *admin.UkmID)
+		} else {
+			session.Set("admin_ukm_id", nil)
+		}
+		
+		if admin.DivisionID != nil {
+			session.Set("admin_division_id", *admin.DivisionID)
+		} else {
+			session.Set("admin_division_id", nil)
+		}
 	} else {
 		// Regular user
 		session.Set("role", "user")
