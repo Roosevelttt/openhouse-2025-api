@@ -30,7 +30,7 @@ func New(cfg *config.Config) http.Handler {
 
 		// User routes
 		userRoutes := api.Group("/user")
-		userRoutes.Use(middleware.AuthenticationWithRoles("user", "admin"))
+		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			userRoutes.POST("/session/values", s.Session.GetValues)
 			userRoutes.GET("/ukms", s.Ukm.List)
@@ -38,7 +38,7 @@ func New(cfg *config.Config) http.Handler {
 
 		// Admin routes
 		adminRoutes := api.Group("/admin")
-		adminRoutes.Use(middleware.AdminAuthentication())
+		adminRoutes.Use(middleware.AuthMiddleware("admin"))
 		{
 			adminRoutes.GET("/participants", s.Participants.List)
 
