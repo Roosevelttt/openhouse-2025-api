@@ -42,6 +42,12 @@ func New(cfg *config.Config) http.Handler {
 		{
 			adminRoutes.GET("/participants", s.Participants.List)
 
+			ukm := adminRoutes.Group("/ukm")
+			{
+				ukm.GET("/groupchat", s.Groupchat.Get)
+				ukm.PUT("/groupchat", s.Groupchat.Update)
+			}
+
 			payment := adminRoutes.Group("/payment")
 			{
 				payment.POST("/validate", s.Validation.Validate)

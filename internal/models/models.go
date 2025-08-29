@@ -41,6 +41,9 @@ type Admin struct {
 	Field      string     `gorm:"column:field" db:"field" json:"field"`
 	CreatedAt  *time.Time `gorm:"column:created_at" db:"created_at" json:"created_at,omitempty"`
 	UpdatedAt  *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
+
+	// Tambahan sendiri di luar DB Admin
+	DivisionSlug *string `db:"-" json:"division_slug,omitempty"`
 }
 
 type DetailRegistration struct {
