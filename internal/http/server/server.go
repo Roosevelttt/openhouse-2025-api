@@ -27,6 +27,7 @@ func NewServer(cfg *config.Config) *Server {
 
 	// --- Repositories that use RAW SQL get the *sql.DB ---
 	userRepo := repositories.NewUserRepository(sqlDB)
+	adminRepo := repositories.NewAdminRepository(sqlDB)
 	ukmRepo := repositories.NewUkmRepository(gormDB) // Pake GORM
 	regRepo := repositories.NewRegistrationRepository(sqlDB)
 	participantsRepo := repositories.NewParticipantsRepository(sqlDB)
@@ -36,7 +37,7 @@ func NewServer(cfg *config.Config) *Server {
 
 	// --- Services ---
 	sessionSvc := services.NewSessionService()
-	authSvc := services.NewAuthService(cfg, userRepo)
+	authSvc := services.NewAuthService(cfg, userRepo, adminRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
 	participantsSvc := services.NewParticipantsService(participantsRepo)
 	mailSvc := services.NewMailService(cfg)

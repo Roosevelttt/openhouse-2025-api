@@ -30,27 +30,19 @@ func (h *PaymentHandler) Validate(c *gin.Context) {
 		return
 	}
 
-	// Assumes a middleware has run and set the admin's details in the context
-	// In a real app, you would have proper error checking here.
-	// TODO: admin session data in context (HTML request)
-	//adminNRP, _ := c.Get("admin_nrp")
-	//adminName, _ := c.Get("admin_name")
-	//adminUkmID, _ := c.Get("admin_ukm_id")
-	adminNRP := "c14230260"
-	adminName := "Christopher Joshua"
-	adminUkmID := "9af73d87-bf4e-4608-bfb9-ca901494b55e"
+	// Get admin context from middleware
+	adminNRP, exists := c.Get("admin_nrp")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Admin context not found"})
+		return
+	}
+	adminName, _ := c.Get("admin_name")
+	adminUkmID, _ := c.Get("admin_ukm_id")
 
-	// If using session
-	//adminCtx := services.AdminContext{
-	//	NRP:   adminNRP.(string),
-	//	Name:  adminName.(string),
-	//	UkmID: adminUkmID.(string),
-	//}
-	// Testing only
 	adminCtx := services.AdminContext{
-		NRP:   adminNRP,
-		Name:  adminName,
-		UkmID: adminUkmID,
+		NRP:   adminNRP.(string),
+		Name:  adminName.(string),
+		UkmID: adminUkmID.(string),
 	}
 
 	// Delegate the core logic to the service
@@ -87,27 +79,19 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 		return
 	}
 
-	// Assumes a middleware has run and set the admin's details in the context
-	// In a real app, you would have proper error checking here.
-	// TODO: admin session data in context (HTML request)
-	//adminNRP, _ := c.Get("admin_nrp")
-	//adminName, _ := c.Get("admin_name")
-	//adminUkmID, _ := c.Get("admin_ukm_id")
-	adminNRP := "c14230260"
-	adminName := "Christopher Joshua"
-	adminUkmID := "9af73d87-bf4e-4608-bfb9-ca901494b55e"
+	// Get admin context from middleware
+	adminNRP, exists := c.Get("admin_nrp")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Admin context not found"})
+		return
+	}
+	adminName, _ := c.Get("admin_name")
+	adminUkmID, _ := c.Get("admin_ukm_id")
 
-	// If using session
-	//adminCtx := services.AdminContext{
-	//	NRP:   adminNRP.(string),
-	//	Name:  adminName.(string),
-	//	UkmID: adminUkmID.(string),
-	//}
-	// Testing only
 	adminCtx := services.AdminContext{
-		NRP:   adminNRP,
-		Name:  adminName,
-		UkmID: adminUkmID,
+		NRP:   adminNRP.(string),
+		Name:  adminName.(string),
+		UkmID: adminUkmID.(string),
 	}
 
 	// Delegate the core logic to the service

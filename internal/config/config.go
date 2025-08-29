@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Env                string
 	HTTPPort           string
 	DBHost             string
 	DBPort             string
@@ -38,6 +39,7 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	cfg := &Config{
+		Env:                getenv("ENV", "development"),
 		HTTPPort:           getenv("HTTP_PORT", "8080"),
 		DBHost:             getenv("DB_HOST", "127.0.0.1"),
 		DBPort:             getenv("DB_PORT", "3306"),
@@ -55,6 +57,14 @@ func Load() *Config {
 		SMTPPass:           getenv("SMTP_PASS", ""),
 		SMTPFrom:           getenv("SMTP_FROM", ""),
 	}
-	log.Printf("config loaded: HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.HTTPPort, cfg.DBHost, cfg.DBName)
+	log.Printf("config loaded: ENV=%s HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.Env, cfg.HTTPPort, cfg.DBHost, cfg.DBName)
 	return cfg
+}
+
+func (c *Config) IsDevelopment() bool {
+	return c.Env == "development" || c.Env == "dev"
+}
+
+func (c *Config) IsProduction() bool {
+	return c.Env == "production" || c.Env == "prod"
 }

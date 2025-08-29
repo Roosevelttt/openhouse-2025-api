@@ -17,26 +17,41 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
-	r.Use(middleware.SessionManager())
+	r.Use(middleware.SessionManager(cfg))
 
 	s := server.NewServer(cfg)
 
 	api := r.Group("/api")
 	{
-
+		api.GET("/debug/session", s.Session.DebugSession)
 		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
-		api.GET("auth/google/callback", s.Auth.OAuthCallback)
+		api.GET("/auth/google/callback", s.Auth.OAuthCallback)
+		api.POST("/auth/logout", s.Auth.Logout)
 
-		api.Use(middleware.Authentication("user"))
+		// User routes
+		userRoutes := api.Group("/user")
+		userRoutes.Use(middleware.AuthenticationWithRoles("user", "admin"))
 		{
-			api.POST("/session/values", s.Session.GetValues)
+			userRoutes.POST("/session/values", s.Session.GetValues)
+			userRoutes.GET("/ukms", s.Ukm.List)
+		}
 
-			//TODO pakai user "admin" sama middleware UKM :)
-			api.GET("/ukms", s.Ukm.List)
-			api.GET("/participants", s.Participants.List)
-			api.POST("/payment/validate", s.Validation.Validate)
-			api.POST("/payment/reject", s.Validation.Reject)
-			api.GET("/export/participants", s.Export.ExportParticipants)
+		// Admin routes
+		adminRoutes := api.Group("/admin")
+		adminRoutes.Use(middleware.AdminAuthentication())
+		{
+			adminRoutes.GET("/participants", s.Participants.List)
+
+			payment := adminRoutes.Group("/payment")
+			{
+				payment.POST("/validate", s.Validation.Validate)
+				payment.POST("/reject", s.Validation.Reject)
+			}
+
+			export := adminRoutes.Group("/export")
+			{
+				export.GET("/participants", s.Export.ExportParticipants)
+			}
 		}
 	}
 
