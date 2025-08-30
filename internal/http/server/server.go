@@ -13,7 +13,8 @@ type Server struct {
 	Auth         *handlers.AuthHandler
 	Ukm          *handlers.UkmHandler
 	Participants *handlers.ParticipantsHandler
-	Payment      *handlers.PaymentHandler
+	Validation   *handlers.PaymentHandler
+	Export       *handlers.ExportHandler
 	Registration *handlers.RegistrationHandler
 }
 
@@ -27,19 +28,22 @@ func NewServer(cfg *config.Config) *Server {
 
 	// --- Repositories that use RAW SQL get the *sql.DB ---
 	userRepo := repositories.NewUserRepository(sqlDB)
+	adminRepo := repositories.NewAdminRepository(sqlDB)
 	ukmRepo := repositories.NewUkmRepository(gormDB) // Pake GORM
 	regRepo := repositories.NewRegistrationRepository(sqlDB)
 	participantsRepo := repositories.NewParticipantsRepository(sqlDB)
 
 	// --- New repositories that use GORM get the *gorm.DB ---
-	paymentRepo := repositories.NewPaymentRepository(gormDB)
+	validationRepo := repositories.NewValidationRepository(gormDB)
 
 	// --- Services ---
 	sessionSvc := services.NewSessionService()
-	authSvc := services.NewAuthService(cfg, userRepo)
+	authSvc := services.NewAuthService(cfg, userRepo, adminRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
 	participantsSvc := services.NewParticipantsService(participantsRepo)
-	paymentSvc := services.NewPaymentService(paymentRepo, userRepo, ukmRepo)
+	mailSvc := services.NewMailService(cfg)
+	validationSvc := services.NewValidationService(gormDB, validationRepo, userRepo, ukmRepo, mailSvc)
+	exportSvc := services.NewExportService(participantsRepo)
 
 	// --- Handlers ---
 	return &Server{
@@ -47,7 +51,8 @@ func NewServer(cfg *config.Config) *Server {
 		Auth:         handlers.NewAuthHandler(authSvc),
 		Ukm:          handlers.NewUkmHandler(ukmSvc),
 		Participants: handlers.NewParticipantsHandler(participantsSvc),
-		Payment:      handlers.NewPaymentHandler(paymentSvc),
+		Validation:   handlers.NewPaymentHandler(validationSvc),
+		Export:       handlers.NewExportHandler(exportSvc),
 		Registration: handlers.NewRegistrationHandler(regRepo),
 	}
 }

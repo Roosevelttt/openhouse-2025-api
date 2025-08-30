@@ -19,7 +19,7 @@ MIGRATIONS_DIR ?= db/migrations
 
 DB_DSN := $(DB_USERNAME):$(DB_PASSWORD)@tcp($(DB_HOST):$(DB_PORT))/$(DB_DATABASE)?parseTime=true&charset=utf8mb4&loc=Local
 
-.PHONY: help tools goose-status migrate-up migrate-down migrate-redo migrate-create seed-ukm run-server tidy
+.PHONY: help tools goose-status migrate-up migrate-down migrate-redo migrate-create seed-ukm seed-division run-server tidy
 
 help:
 	@echo "Targets:"
@@ -30,6 +30,7 @@ help:
 	@echo "  migrate-redo     Rollback then re-apply the most recent migration"
 	@echo "  migrate-create name=<snake_case>  Create a new SQL migration"
 	@echo "  seed-ukm         Run the UKM seeder"
+	@echo "  seed-division    Run the Division seeder"
 	@echo "  run-server       Run the API server"
 	@echo "  tidy             go mod tidy"
 
@@ -55,6 +56,9 @@ migrate-create:
 
 seed-ukm:
 	$(GO) run ./cmd/ukmseeder
+
+seed-division:
+	$(GO) run ./cmd/divisionseeder
 
 run-server:
 	$(GO) run ./cmd/server

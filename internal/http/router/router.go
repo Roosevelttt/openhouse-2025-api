@@ -17,16 +17,42 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
-	r.Use(middleware.SessionManager())
+	r.Use(middleware.SessionManager(cfg))
 
 	s := server.NewServer(cfg)
 
 	api := r.Group("/api")
 	{
-
+		api.GET("/debug/session", s.Session.DebugSession)
 		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
-		api.GET("auth/google/callback", s.Auth.OAuthCallback)
+		api.GET("/auth/google/callback", s.Auth.OAuthCallback)
+		api.POST("/auth/logout", s.Auth.Logout)
 
+		// User routes
+		userRoutes := api.Group("/user")
+		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
+		{
+			userRoutes.POST("/session/values", s.Session.GetValues)
+			userRoutes.GET("/ukms", s.Ukm.List)
+		}
+
+		// Admin routes
+		adminRoutes := api.Group("/admin")
+		adminRoutes.Use(middleware.AuthMiddleware("admin"))
+		{
+			adminRoutes.GET("/participants", s.Participants.List)
+
+			payment := adminRoutes.Group("/payment")
+			{
+				payment.POST("/validate", s.Validation.Validate)
+				payment.POST("/reject", s.Validation.Reject)
+			}
+
+			export := adminRoutes.Group("/export")
+			{
+				export.GET("/participants", s.Export.ExportParticipants)
+			}
+		}
 		api.GET("/ukms", s.Ukm.List)
 		api.GET("/participants", s.Participants.List)
 		api.POST("/payment/validate", s.Payment.Validate)

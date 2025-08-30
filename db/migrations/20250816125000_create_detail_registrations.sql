@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS detail_registrations (
   nrp VARCHAR(9) NOT NULL,
   ukm_id CHAR(36) NOT NULL,
   payment VARCHAR(255) NULL,
-  code VARCHAR(255) NOT NULL,
   drive_url VARCHAR(255) NULL,
   file_validated TINYINT NOT NULL COMMENT '0: No, 1: Yes, 2: Reject',
   payment_validated TINYINT NOT NULL COMMENT '0: No, 1: Yes',

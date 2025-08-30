@@ -12,12 +12,16 @@ type User struct {
 }
 
 type Ukm struct {
-	ID          string `gorm:"primaryKey;column:id" db:"id" json:"id"`
-	Name        string `gorm:"column:name" db:"name" json:"name"`
-	Slug        string `gorm:"column:slug" db:"slug" json:"slug"`
-	CurrentSlot int    `gorm:"column:current_slot" db:"current_slot" json:"current_slot"`
-	MaxSlot     int    `gorm:"column:max_slot" db:"max_slot" json:"max_slot"`
-	RegistFee   int    `gorm:"column:regist_fee" db:"regist_fee" json:"regist_fee"`
+	ID          string  `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	Name        string  `gorm:"column:name" db:"name" json:"name"`
+	Slug        string  `gorm:"column:slug" db:"slug" json:"slug"`
+	CurrentSlot int     `gorm:"column:current_slot" db:"current_slot" json:"current_slot"`
+	MaxSlot     int     `gorm:"column:max_slot" db:"max_slot" json:"max_slot"`
+	RegistFee   int     `gorm:"column:regist_fee" db:"regist_fee" json:"regist_fee"`
+	Description string  `gorm:"column:description" db:"description" json:"description"`
+	LogoURL     string  `gorm:"column:logo_url" db:"logo_url" json:"logo_url"`
+	PosterURL   *string `gorm:"column:poster_url" db:"poster_url" json:"poster_url"`
+	Groupchat   string  `gorm:"column:groupchat" db:"groupchat" json:"groupchat"`
 }
 
 type Division struct {
@@ -44,7 +48,6 @@ type DetailRegistration struct {
 	NRP              string     `gorm:"column:nrp" db:"nrp" json:"nrp"`
 	UkmID            string     `gorm:"column:ukm_id" db:"ukm_id" json:"ukm_id"`
 	Payment          string     `gorm:"column:payment" db:"payment" json:"payment"`
-	Code             string     `gorm:"column:code" db:"code" json:"code"`
 	DriveURL         string     `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `gorm:"column:payment_validated" db:"payment_validated" json:"payment_validated"`
@@ -61,8 +64,8 @@ type Participant struct {
 	UkmId            string     `db:"ukm_id" json:"ukm_id"`
 	UkmName          string     `db:"ukm_name" json:"ukm_name"`
 	Payment          *string    `db:"payment" json:"payment"`
+	DriveURL         *string    `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
-	IsInvited        int        `db:"isInvited" json:"is_invited"`
 }

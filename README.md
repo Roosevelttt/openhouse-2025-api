@@ -36,7 +36,12 @@ make migrate-up
 make seed-ukm
 ```
 
-5) Run server
+5) Seed Divisions
+```
+make seed-division
+```
+
+6) Run server
 ```
 make run-server
 # Server on :8080 (configurable via HTTP_PORT)
@@ -48,5 +53,6 @@ make run-server
 - migrate-up | migrate-down | migrate-redo
 - migrate-create name=<snake_case>: create a new SQL migration in db/migrations
 - seed-ukm: run the UKM seeder
+- seed-division: run the Division seeder
 - run-server: run the API server
 - tidy: `go mod tidy`
