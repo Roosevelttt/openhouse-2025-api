@@ -18,7 +18,6 @@ type Config struct {
 	GoogleClientID     string
 	GoogleClientSecret string
 	GoogleRedirectURL  string
-	JWTSecret          string
 	CORSOrigins        string
 	SMTPHost           string
 	SMTPPort           string
@@ -49,7 +48,6 @@ func Load() *Config {
 		GoogleClientID:     getenv("GOOGLE_CLIENT_ID", ""),
 		GoogleClientSecret: getenv("GOOGLE_CLIENT_SECRET", ""),
 		GoogleRedirectURL:  getenv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/auth/google/callback"),
-		JWTSecret:          getenv("JWT_SECRET", "change-me"),
 		CORSOrigins:        getenv("CORS_ORIGINS", "*"),
 		SMTPHost:           getenv("SMTP_HOST", ""),
 		SMTPPort:           getenv("SMTP_PORT", "587"),
