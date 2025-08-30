@@ -103,7 +103,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 		NRP:      nrp,
 		UkmID:    ukmID,
 		Payment:  filename, // Store filename instead of integer
-		Code:     code,
+		// Code:     code,
 		DriveURL: driveURL,
 	}
 

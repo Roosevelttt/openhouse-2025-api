@@ -34,6 +34,7 @@ func New(cfg *config.Config) http.Handler {
 		{
 			userRoutes.POST("/session/values", s.Session.GetValues)
 			userRoutes.GET("/ukms", s.Ukm.List)
+			
 		}
 
 		// Admin routes
@@ -53,16 +54,9 @@ func New(cfg *config.Config) http.Handler {
 				export.GET("/participants", s.Export.ExportParticipants)
 			}
 		}
-		api.GET("/ukms", s.Ukm.List)
-		api.GET("/participants", s.Participants.List)
-		api.POST("/payment/validate", s.Payment.Validate)
+
 		api.GET("/registrations/test", s.Registration.Test)
 		api.POST("/registrations", s.Registration.Create)
-
-		api.Use(middleware.Authentication("user"))
-		{
-			api.POST("/session/values", s.Session.GetValues)
-		}
 	}
 
 	return r
