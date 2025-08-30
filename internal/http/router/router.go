@@ -28,12 +28,13 @@ func New(cfg *config.Config) http.Handler {
 		api.GET("/auth/google/callback", s.Auth.OAuthCallback)
 		api.POST("/auth/logout", s.Auth.Logout)
 
+		api.GET("/ukms", s.Ukm.List)
+
 		// User routes
 		userRoutes := api.Group("/user")
 		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			userRoutes.POST("/session/values", s.Session.GetValues)
-			userRoutes.GET("/ukms", s.Ukm.List)
 		}
 
 		// Admin routes
