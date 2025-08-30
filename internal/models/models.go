@@ -5,10 +5,11 @@ import "time"
 //import "gorm.io/gorm"
 
 type User struct {
-	NRP    string `gorm:"primaryKey;column:nrp" db:"nrp" json:"nrp"`
-	Name   string `gorm:"column:name" db:"name" json:"name"`
-	LineID string `gorm:"column:line_id" db:"line_id" json:"line_id"`
-	Phone  string `gorm:"column:phone" db:"phone" json:"phone"`
+	NRP           string `gorm:"primaryKey;column:nrp" db:"nrp" json:"nrp"`
+	Name          string `gorm:"column:name" db:"name" json:"name"`
+	LineID        string `gorm:"column:line_id" db:"line_id" json:"line_id"`
+	Phone         string `gorm:"column:phone" db:"phone" json:"phone"`
+	FormSubmitted int    `gorm:"column:form_submitted" db:"form_submitted" json:"form_submitted"`
 }
 
 type Ukm struct {
