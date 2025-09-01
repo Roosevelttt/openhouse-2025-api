@@ -38,6 +38,8 @@ func New(cfg *config.Config) http.Handler {
 		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			userRoutes.POST("/session/values", s.Session.GetValues)
+			userRoutes.GET("/biodata", s.User.GetBiodata)
+			userRoutes.POST("/biodata", s.User.UpdateBiodata)
 		}
 
 		// Admin routes
