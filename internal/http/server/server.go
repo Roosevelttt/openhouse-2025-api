@@ -16,6 +16,7 @@ type Server struct {
 	Participants *handlers.ParticipantsHandler
 	Validation   *handlers.PaymentHandler
 	Export       *handlers.ExportHandler
+	Groupchat    *handlers.GroupchatHandler
 	Registration *handlers.RegistrationHandler
 }
 
@@ -46,6 +47,7 @@ func NewServer(cfg *config.Config) *Server {
 	mailSvc := services.NewMailService(cfg)
 	validationSvc := services.NewValidationService(gormDB, validationRepo, userRepo, ukmRepo, mailSvc)
 	exportSvc := services.NewExportService(participantsRepo)
+	groupchatSvc := services.NewGroupchatService(ukmRepo)
 
 	// --- Handlers ---
 	return &Server{
@@ -56,6 +58,7 @@ func NewServer(cfg *config.Config) *Server {
 		Participants: handlers.NewParticipantsHandler(participantsSvc),
 		Validation:   handlers.NewPaymentHandler(validationSvc),
 		Export:       handlers.NewExportHandler(exportSvc),
+		Groupchat:    handlers.NewGroupchatHandler(groupchatSvc),
 		Registration: handlers.NewRegistrationHandler(regRepo),
 	}
 }

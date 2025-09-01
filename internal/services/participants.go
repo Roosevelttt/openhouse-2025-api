@@ -14,6 +14,6 @@ func NewParticipantsService(repo *repositories.ParticipantsRepository) *Particip
 	return &ParticipantsService{participants: repo}
 }
 
-func (s *ParticipantsService) ListParticipants(ctx context.Context) ([]models.Participant, error) {
-	return s.participants.List(ctx)
+func (s *ParticipantsService) ListParticipants(ctx context.Context, adminDivisionSlug string, adminUkmID string) ([]models.Participant, error) {
+	return s.participants.List(ctx, adminDivisionSlug, adminUkmID)
 }

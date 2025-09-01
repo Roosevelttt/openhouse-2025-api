@@ -80,8 +80,10 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 
 		if admin.DivisionID != nil {
 			session.Set("admin_division_id", *admin.DivisionID)
+			session.Set("admin_division_slug", *admin.DivisionSlug)
 		} else {
 			session.Set("admin_division_id", nil)
+			session.Set("admin_division_slug", nil)
 		}
 	} else {
 		// Regular user - create/update user record in database

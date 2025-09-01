@@ -18,7 +18,7 @@ func NewExportHandler(exportSvc *services.ExportService) *ExportHandler {
 }
 
 func (h *ExportHandler) ExportParticipants(c *gin.Context) {
-	buffer, err := h.exportSvc.GenerateParticipantsExcel(c.Request.Context())
+	buffer, err := h.exportSvc.GenerateParticipantsExcel(c.Request.Context(), c.GetString("admin_division_slug"), c.GetString("admin_ukm_id"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate Excel file"})
 		return

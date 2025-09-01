@@ -13,12 +13,25 @@ func NewParticipantsRepository(db *sql.DB) *ParticipantsRepository {
 	return &ParticipantsRepository{db: db}
 }
 
-func (r *ParticipantsRepository) List(ctx context.Context) ([]models.Participant, error) {
-	rows, err := r.db.QueryContext(ctx, `
-		SELECT u.id ,u.nrp, u.name, line_id, phone, uk.id AS ukm_id, uk.name AS ukm_name, dr.payment, dr.drive_url, dr.file_validated, dr.payment_validated, dr.created_at FROM users u 
-		    JOIN detail_registrations dr ON u.nrp=dr.nrp
+func (r *ParticipantsRepository) List(ctx context.Context, adminDivisionSlug string, adminUkmID string) ([]models.Participant, error) {
+	query := `
+		SELECT u.id ,u.nrp, u.name, line_id, phone, 
+		       uk.id AS ukm_id, uk.name AS ukm_name, 
+		       dr.payment, dr.drive_url, dr.file_validated, dr.payment_validated, dr.created_at 
+		FROM users u 
+		JOIN detail_registrations dr ON u.nrp=dr.nrp
 		JOIN ukms uk ON uk.id=dr.ukm_id
-		`)
+		`
+
+	// Siapkan slice untuk menyimpan argumen kueri secara dinamis
+	var args []interface{}
+
+	if adminDivisionSlug != "it" && adminDivisionSlug != "bph" {
+		query += `WHERE uk.id = ?`
+		args = append(args, adminUkmID)
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

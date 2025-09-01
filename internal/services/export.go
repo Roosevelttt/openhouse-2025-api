@@ -19,9 +19,9 @@ func NewExportService(participantsRepo *repositories.ParticipantsRepository) *Ex
 }
 
 // GenerateParticipantsExcel creates an Excel file in memory and returns it as a byte buffer.
-func (s *ExportService) GenerateParticipantsExcel(ctx context.Context) (*bytes.Buffer, error) {
+func (s *ExportService) GenerateParticipantsExcel(ctx context.Context, adminDivisionSlug string, adminUkmID string) (*bytes.Buffer, error) {
 	// 1. Fetch all participant data
-	participants, err := s.participantsRepo.List(ctx)
+	participants, err := s.participantsRepo.List(ctx, adminDivisionSlug, adminUkmID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch participants: %w", err)
 	}

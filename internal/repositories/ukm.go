@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"openhouse-2025-api/internal/models"
 
 	"gorm.io/gorm"
@@ -48,4 +50,41 @@ func (r *UkmRepository) FindByID(ctx context.Context, ukmID string) (*models.Ukm
 	}
 
 	return &ukm, nil
+}
+
+// GetGroupchatLink retrieves only the groupchat_link for a specific UKM ID.
+func (r *UkmRepository) GetGroupchatLink(ctx context.Context, ukmID string) (*string, error) {
+	var groupchatLink sql.NullString // Use sql.NullString to handle NULL values
+
+	result := r.db.Model(&models.Ukm{}).WithContext(ctx).Select("groupchat").Where("id = ?", ukmID).Scan(&groupchatLink)
+	if result.Error != nil {
+		// If no record is found, it's not a fatal error for this function. Return nil.
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+
+	if groupchatLink.Valid {
+		return &groupchatLink.String, nil
+	}
+
+	return nil, nil // Return nil if the link is NULL in the database
+}
+
+// UpdateGroupchatLink updates the groupchat_link for a specific UKM ID.
+func (r *UkmRepository) UpdateGroupchatLink(ctx context.Context, ukmID string, newLink string) error {
+	result := r.db.Model(&models.Ukm{}).WithContext(ctx).Where("id = ?", ukmID).Update("groupchat", newLink)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// It's good practice to check if a row was actually affected.
+	// If not, it means the ukmID did not exist.
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
