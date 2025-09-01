@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"openhouse-2025-api/internal/services"
 
@@ -38,19 +39,27 @@ func (h *PaymentHandler) Validate(c *gin.Context) {
 	}
 
 	adminName, _ := c.Get("admin_name")
-	adminUkmID, _ := c.Get("admin_ukm_id")
+	adminUkmID, adminUkmExists := c.Get("admin_ukm_id")
 
 	// Klo bukan BPH atau IT atau ketua UKM maka tidak boleh melakukan validasi
 	adminDivisionSlug, _ := c.Get("admin_division_slug")
-	if adminDivisionSlug != "bph" && adminDivisionSlug != "it" && adminUkmID != req.UKM {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh BPH, IT dan Ketua UKM"})
+	isBphOrIt := adminDivisionSlug == "bph" || adminDivisionSlug == "it"
+	isSameUkm := adminUkmExists && adminUkmID == req.UKM
+
+	if !(isBphOrIt || isSameUkm) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh Ketua UKM, BPH, dan IT"})
 		return
 	}
 
+	var ukmID *string
+	if idStr, ok := adminUkmID.(string); ok {
+		ukmID = &idStr
+	}
+	//log.Println("testtt" + adminUkmID.(string))
 	adminCtx := services.AdminContext{
 		NRP:   adminNRP.(string),
 		Name:  adminName.(string),
-		UkmID: adminUkmID.(string),
+		UkmID: ukmID,
 	}
 
 	// Delegate the core logic to the service
@@ -69,9 +78,9 @@ func (h *PaymentHandler) Validate(c *gin.Context) {
 	case services.ValidationSuccess:
 		c.JSON(http.StatusOK, gin.H{"message": "true"})
 	case services.ValidationAlreadyDone:
-		c.JSON(http.StatusConflict, gin.H{"message": "false"})
+		c.JSON(http.StatusConflict, gin.H{"message": fmt.Sprintf("%s has already been validated.", req.NRP)})
 	case services.RejectionAlreadyDone:
-		c.JSON(http.StatusForbidden, gin.H{"message": "warning"})
+		c.JSON(http.StatusForbidden, gin.H{"message": fmt.Sprintf("%s has already been rejected.", req.NRP)})
 	// Ga dipakai
 	//case services.ValidationFileNotReviewed:
 	//	c.JSON(http.StatusPreconditionFailed, gin.H{"message": "not_yet"})
@@ -94,19 +103,26 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 		return
 	}
 	adminName, _ := c.Get("admin_name")
-	adminUkmID, _ := c.Get("admin_ukm_id")
+	adminUkmID, adminUkmExists := c.Get("admin_ukm_id")
 
 	// Klo bukan BPH atau IT atau ketua UKM maka tidak boleh melakukan validasi
 	adminDivisionSlug, _ := c.Get("admin_division_slug")
-	if adminDivisionSlug != "bph" && adminDivisionSlug != "it" && adminUkmID != req.UKM {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh BPH, IT dan Ketua UKM"})
+	isBphOrIt := adminDivisionSlug == "bph" || adminDivisionSlug == "it"
+	isSameUkm := adminUkmExists && adminUkmID == req.UKM
+
+	if !(isBphOrIt || isSameUkm) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh Ketua UKM, BPH, dan IT"})
 		return
 	}
 
+	var ukmID *string
+	if idStr, ok := adminUkmID.(string); ok {
+		ukmID = &idStr
+	}
 	adminCtx := services.AdminContext{
 		NRP:   adminNRP.(string),
 		Name:  adminName.(string),
-		UkmID: adminUkmID.(string),
+		UkmID: ukmID,
 	}
 
 	// Delegate the core logic to the service
@@ -125,9 +141,9 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 	case services.RejectionSuccess:
 		c.JSON(http.StatusOK, gin.H{"message": "true"})
 	case services.RejectionAlreadyDone:
-		c.JSON(http.StatusConflict, gin.H{"message": "false"})
+		c.JSON(http.StatusConflict, gin.H{"message": fmt.Sprintf("%s has already been rejected.", req.NRP)})
 	case services.ValidationAlreadyDone:
-		c.JSON(http.StatusConflict, gin.H{"message": "validated"})
+		c.JSON(http.StatusConflict, gin.H{"message": fmt.Sprintf("%s has already been validated.", req.NRP)})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unknown validation status"})
 	}
