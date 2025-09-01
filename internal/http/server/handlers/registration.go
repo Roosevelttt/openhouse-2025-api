@@ -39,14 +39,13 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	// Get form values
 	ukmID := c.PostForm("ukm_id")
 	nrp := c.PostForm("nrp")
-	code := c.PostForm("code")
 	driveURL := c.PostForm("drive_url")
 
 	// Debug: Print received values
-	fmt.Printf("Received values - UkmID: %s, NRP: %s, Code: %s, DriveURL: %s\n", ukmID, nrp, code, driveURL)
+	fmt.Printf("Received values - UkmID: %s, NRP: %s, DriveURL: %s\n", ukmID, nrp, driveURL)
 
 	// Validate required fields
-	if ukmID == "" || nrp == "" || code == "" || driveURL == "" {
+	if ukmID == "" || nrp == "" || driveURL == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
 		return
 	}
@@ -82,7 +81,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	}
 
 	// Generate unique filename
-	filename := fmt.Sprintf("%s_%s_%s%s", nrp, ukmID, code, ext)
+	filename := fmt.Sprintf("%s_%s_%s%s", nrp, ukmID, ext)
 	filePath := filepath.Join(uploadsDir, filename)
 
 	// Save file
@@ -103,13 +102,12 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 		NRP:      nrp,
 		UkmID:    ukmID,
 		Payment:  filename, // Store filename instead of integer
-		// Code:     code,
 		DriveURL: driveURL,
 	}
 
 	// Debug: Print the data being inserted
-	fmt.Printf("Creating registration: NRP=%s, UkmID=%s, Payment=%s, Code=%s, DriveURL=%s\n",
-		nrp, ukmID, filename, code, driveURL)
+	fmt.Printf("Creating registration: NRP=%s, UkmID=%s, Payment=%s, DriveURL=%s\n",
+		nrp, ukmID, filename, driveURL)
 
 	if err := h.registrationRepo.Create(c.Request.Context(), registration); err != nil {
 		// Clean up uploaded file if database insert fails

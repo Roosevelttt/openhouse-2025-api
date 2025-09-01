@@ -21,6 +21,9 @@ func New(cfg *config.Config) http.Handler {
 
 	s := server.NewServer(cfg)
 
+	// Serve static files for uploads
+	r.Static("/uploads", "./uploads")
+
 	api := r.Group("/api")
 	{
 		api.GET("/debug/session", s.Session.DebugSession)

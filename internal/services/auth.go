@@ -1,9 +1,10 @@
 package services
 
 import (
-	"strings"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
@@ -11,6 +12,7 @@ import (
 	"github.com/markbates/goth/providers/google"
 
 	"openhouse-2025-api/internal/config"
+	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
 
 	"github.com/gin-contrib/sessions"
@@ -69,22 +71,38 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 		session.Set("nrp", nrp)
 		session.Set("admin_id", admin.ID)
 		session.Set("admin_name", admin.Name)
-		
+
 		if admin.UkmID != nil {
 			session.Set("admin_ukm_id", *admin.UkmID)
 		} else {
 			session.Set("admin_ukm_id", nil)
 		}
-		
+
 		if admin.DivisionID != nil {
 			session.Set("admin_division_id", *admin.DivisionID)
 		} else {
 			session.Set("admin_division_id", nil)
 		}
 	} else {
-		// Regular user
+		// Regular user - create/update user record in database
+		userModel := &models.User{
+			NRP:    nrp,
+			Name:   user.Name, // Get name from Google OAuth
+			LineID: "",        // Will be empty initially, user can update later
+			Phone:  "",        // Will be empty initially, user can update later
+		}
+
+		// Create or update user in database
+		if err := s.users.UpsertByNRP(c.Request.Context(), userModel); err != nil {
+			// Log the error but don't fail the login process
+			// You might want to handle this differently in production
+			fmt.Printf("Warning: Failed to create/update user in database: %v\n", err)
+		}
+
 		session.Set("role", "user")
 		session.Set("nrp", nrp)
+		session.Set("name", user.Name)
+		session.Set("email", user.Email)
 	}
 
 	session.Save()

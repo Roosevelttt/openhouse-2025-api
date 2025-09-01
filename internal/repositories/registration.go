@@ -23,8 +23,8 @@ func (r *RegistrationRepository) Create(ctx context.Context, reg *models.DetailR
 	reg.FileValidated = 0    // Default: not validated
 	reg.PaymentValidated = 0 // Default: not validated
 
-	query := `INSERT INTO detail_registrations (id, nrp, ukm_id, payment, code, drive_url, file_validated, payment_validated, created_at, updated_at) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO detail_registrations (id, nrp, ukm_id, payment, drive_url, file_validated, payment_validated, created_at, updated_at) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	_, err := r.db.ExecContext(ctx, query, reg.ID, reg.NRP, reg.UkmID, reg.Payment, reg.DriveURL, reg.FileValidated, reg.PaymentValidated, reg.CreatedAt, reg.UpdatedAt)
 	return err
