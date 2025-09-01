@@ -96,6 +96,6 @@ func (r *ValidationRepository) UpdateStatus(db *gorm.DB, nrp, ukmID string, fiel
 func (r *ValidationRepository) IncrementUkmSlot(tx *gorm.DB, ukmID string) error {
 	// gorm.Expr allows us to write raw SQL expressions for updates.
 	// This is the safe way to do an increment.
-	result := tx.Model(&models.Ukm{}).Where("id = ?", ukmID).Update("current_slot", gorm.Expr("current_slot + 1"))
+	result := tx.Model(&models.Ukm{}).Where("id = ?", ukmID).Update("current_slot", gorm.Expr("COALESCE(current_slot, 0) + 1"))
 	return result.Error
 }
