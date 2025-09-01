@@ -43,7 +43,7 @@ func (h *PaymentHandler) Validate(c *gin.Context) {
 	// Klo bukan BPH atau IT atau ketua UKM maka tidak boleh melakukan validasi
 	adminDivisionSlug, _ := c.Get("admin_division_slug")
 	if adminDivisionSlug != "bph" && adminDivisionSlug != "it" && adminUkmID != req.UKM {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Validasi hanya bisa dilakukan oleh BPH, IT dan Ketua UKM"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh BPH, IT dan Ketua UKM"})
 		return
 	}
 
@@ -95,6 +95,13 @@ func (h *PaymentHandler) Reject(c *gin.Context) {
 	}
 	adminName, _ := c.Get("admin_name")
 	adminUkmID, _ := c.Get("admin_ukm_id")
+
+	// Klo bukan BPH atau IT atau ketua UKM maka tidak boleh melakukan validasi
+	adminDivisionSlug, _ := c.Get("admin_division_slug")
+	if adminDivisionSlug != "bph" && adminDivisionSlug != "it" && adminUkmID != req.UKM {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Validasi hanya bisa dilakukan oleh BPH, IT dan Ketua UKM"})
+		return
+	}
 
 	adminCtx := services.AdminContext{
 		NRP:   adminNRP.(string),
