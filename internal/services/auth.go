@@ -74,8 +74,10 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 
 		if admin.UkmID != nil {
 			session.Set("admin_ukm_id", *admin.UkmID)
+			session.Set("admin_ukm_name", *admin.UkmName)
 		} else {
 			session.Set("admin_ukm_id", nil)
+			session.Set("admin_ukm_name", nil)
 		}
 
 		if admin.DivisionID != nil {
