@@ -88,3 +88,39 @@ func (r *UkmRepository) UpdateGroupchatLink(ctx context.Context, ukmID string, n
 
 	return nil
 }
+
+func (r *UkmRepository) Create(ctx context.Context, ukm *models.Ukm) error {
+	result := r.db.WithContext(ctx).Create(ukm)
+	return result.Error
+}
+
+func (r *UkmRepository) Update(ctx context.Context, ukm *models.Ukm) error {
+	result := r.db.WithContext(ctx).Save(ukm)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (r *UkmRepository) Delete(ctx context.Context, ukmID string) error {
+	result := r.db.WithContext(ctx).Delete(&models.Ukm{}, "id = ?", ukmID)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (r *UkmRepository) FindBySlug(ctx context.Context, slug string) (*models.Ukm, error) {
+	var ukm models.Ukm
+	result := r.db.WithContext(ctx).Where("slug = ?", slug).First(&ukm)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &ukm, nil
+}

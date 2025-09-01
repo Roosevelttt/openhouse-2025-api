@@ -32,6 +32,8 @@ func New(cfg *config.Config) http.Handler {
 		api.POST("/auth/logout", s.Auth.Logout)
 
 		api.GET("/ukms", s.Ukm.List)
+		api.GET("/ukms/:id", s.Ukm.GetByID)
+		api.GET("/ukms/slug/:slug", s.Ukm.GetBySlug)
 
 		// User routes
 		userRoutes := api.Group("/user")
@@ -52,6 +54,14 @@ func New(cfg *config.Config) http.Handler {
 			{
 				ukm.GET("/groupchat", s.Groupchat.Get)
 				ukm.PUT("/groupchat", s.Groupchat.Update)
+			}
+
+			// CRUD UKM
+			ukmManagement := adminRoutes.Group("/ukms")
+			{
+				ukmManagement.POST("", s.Ukm.Create)
+				ukmManagement.PUT("/:id", s.Ukm.Update)
+				ukmManagement.DELETE("/:id", s.Ukm.Delete)
 			}
 
 			payment := adminRoutes.Group("/payment")
