@@ -56,7 +56,13 @@
 
 		// set session
 		email := user.Email
-		nrp := strings.Split(email, "@")[0]
+		parts := strings.Split(email, "@")
+		nrp := parts[0]
+		institution := parts[1]
+
+		if institution != "john.petra.ac.id" {
+			c.Redirect(http.StatusUnauthorized, os.Getenv("CORS_ORIGINS") + "/login")
+		}
 		
 		session := sessions.Default(c)
 		session.Set("role", "user")
