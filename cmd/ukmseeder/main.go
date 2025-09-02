@@ -24,11 +24,11 @@ type UkmSeed struct {
 
 func main() {
 	cfg := config.Load()
-	db := repositories.MustConnectMySQL(cfg)
-	defer db.Close()
+	sqlDB, _, _ := repositories.NewDatabaseConnections(cfg)
+	defer sqlDB.Close()
 
 	// Load from JSON only
-	if err := seedFromJSON(db, "db/seeds/ukms.json"); err != nil {
+	if err := seedFromJSON(sqlDB, "db/seeds/ukms.json"); err != nil {
 		log.Fatalf("seeding from JSON failed: %v", err)
 	}
 	log.Println("ukm seeding completed")

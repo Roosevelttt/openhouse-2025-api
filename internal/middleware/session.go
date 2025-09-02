@@ -1,8 +1,10 @@
 package middleware
 
 import (
-    "os"
-    "log"
+	"log"
+	"os"
+
+	"openhouse-2025-api/internal/config"
 
     "github.com/markbates/goth/gothic"
     "github.com/gin-contrib/sessions"
@@ -11,12 +13,12 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func SessionManager() gin.HandlerFunc {
-    // hashkey hrs ada
-    hashKey := os.Getenv("SESSION_HASH_KEY")
-    if hashKey == "" {
-        log.Fatal("SESSION_HASH_KEY environment variable is not set.")
-    }
+func SessionManager(cfg *config.Config) gin.HandlerFunc {
+	// hashkey hrs ada
+	hashKey := os.Getenv("SESSION_HASH_KEY")
+	if hashKey == "" {
+		log.Fatal("SESSION_HASH_KEY environment variable is not set.")
+	}
 
     // redisAddr := os.Getenv("REDIS_ADDR")
     redisAddr := "localhost:8001"
@@ -41,5 +43,5 @@ func SessionManager() gin.HandlerFunc {
     })
     gothic.Store = store
 
-    return sessions.Sessions("mysession", store)
+	return sessions.Sessions("mysession", store)
 }

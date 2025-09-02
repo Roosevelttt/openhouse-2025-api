@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Pembaruan Status Pembayaran</title>
+    <style>
+        body { font-family: sans-serif; color: #333; }
+        .container { padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; margin: auto; }
+        .header { font-size: 24px; font-weight: bold; }
+        .content { margin-top: 20px; line-height: 1.6; }
+        h4 { margin: 0; }
+        .mt-10 { margin-top: 10px; }
+        .mt-20 { margin-top: 20px; }
+        .mb-5 { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        {{if .IsAccepted}}
+        <h4 class="mt-10">Hai {{ .UserName }}, pembayaranmu telah divalidasi !</h4>
+        <h4 class="mt-20 mb-5">Selamat! Kamu berhasil terdaftar pada {{ .UkmName }}.</h4>
+        <h4 class="mt-20 mb-5">Silahkan join grup UKM yang telah kamu ikuti.</h4>
+        <h4 class="mt-20 mb-5">Link Grup {{ .UkmName }} : {{ .LinkGroupChatUKM }} : </h4>
+        {{else}}
+        <h4 class="mt-10">Hai {{ .UserName }}, pembayaranmu ditolak !</h4>
+        <h4 class="mt-20 mb-5">Kamu gagal terdaftar pada {{ .UkmName }} karena bukti pembayaran yang tidak valid.</h4>
+        {{end}}
+    </div>
+    <div class="footer" style="margin-top: 20px; font-size: 12px; color: #888;">
+        Jika ada pertanyaan lebih lanjut, silahkan hubungi OA Line Openhouse
+        <a href="https://line.me/R/ti/p/@001pyqes">@001pyqes</a>
+    </div>
+</div>
+</body>
+</html>

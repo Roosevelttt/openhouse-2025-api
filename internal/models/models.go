@@ -2,50 +2,77 @@ package models
 
 import "time"
 
+//import "gorm.io/gorm"
+
 type User struct {
-	NRP    string `db:"nrp" json:"nrp"`
-	Name   string `db:"name" json:"name"`
-	LineID string `db:"line_id" json:"line_id"`
-	Phone  string `db:"phone" json:"phone"`
+	NRP           string `gorm:"primaryKey;column:nrp" db:"nrp" json:"nrp"`
+	Name          string `gorm:"column:name" db:"name" json:"name"`
+	LineID        string `gorm:"column:line_id" db:"line_id" json:"line_id"`
+	Phone         string `gorm:"column:phone" db:"phone" json:"phone"`
+	FormSubmitted int    `gorm:"column:form_submitted" db:"form_submitted" json:"form_submitted"`
 }
 
 type Ukm struct {
-	ID          string `db:"id" json:"id"`
-	Name        string `db:"name" json:"name"`
-	Slug        string `db:"slug" json:"slug"`
-	CurrentSlot int    `db:"current_slot" json:"current_slot"`
-	MaxSlot     int    `db:"max_slot" json:"max_slot"`
-	RegistFee   int    `db:"regist_fee" json:"regist_fee"`
+	ID          string  `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	Name        string  `gorm:"column:name" db:"name" json:"name"`
+	Slug        string  `gorm:"column:slug" db:"slug" json:"slug"`
+	CurrentSlot *int    `gorm:"column:current_slot" db:"current_slot" json:"current_slot"`
+	MaxSlot     *int    `gorm:"column:max_slot" db:"max_slot" json:"max_slot"`
+	RegistFee   *int    `gorm:"column:regist_fee" db:"regist_fee" json:"regist_fee"`
+	Description string  `gorm:"column:description" db:"description" json:"description"`
+	LogoURL     string  `gorm:"column:logo_url" db:"logo_url" json:"logo_url"`
+	PosterURL   *string `gorm:"column:poster_url" db:"poster_url" json:"poster_url"`
+	Groupchat   string  `gorm:"column:groupchat" db:"groupchat" json:"groupchat"`
+	ImageURLs   *string `gorm:"column:image_urls;type:json" db:"image_urls" json:"image_urls"`
+	VideoURL    *string `gorm:"column:video_url" db:"video_url" json:"video_url"`
+	QrisURL     *string `gorm:"column:qris_url" db:"qris_url" json:"qris_url"`
 }
 
 type Division struct {
-	ID        string     `db:"id" json:"id"`
-	Name      string     `db:"name" json:"name"`
-	Slug      string     `db:"slug" json:"slug"`
-	CreatedAt *time.Time `db:"created_at" json:"created_at,omitempty"`
-	UpdatedAt *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+	ID        string     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	Name      string     `gorm:"column:name" db:"name" json:"name"`
+	Slug      string     `gorm:"column:slug" db:"slug" json:"slug"`
+	CreatedAt *time.Time `gorm:"column:created_at" db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
 }
 
 type Admin struct {
-	ID         string     `db:"id" json:"id"`
-	UkmID      *string    `db:"ukm_id" json:"ukm_id,omitempty"`
-	DivisionID *string    `db:"division_id" json:"division_id,omitempty"`
-	Name       string     `db:"name" json:"name"`
-	NRP        string     `db:"nrp" json:"nrp"`
-	Field      string     `db:"field" json:"field"`
-	CreatedAt  *time.Time `db:"created_at" json:"created_at,omitempty"`
-	UpdatedAt  *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+	ID         string     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UkmID      *string    `gorm:"column:ukm_id" db:"ukm_id" json:"ukm_id,omitempty"`
+	DivisionID *string    `gorm:"column:division_id" db:"division_id" json:"division_id,omitempty"`
+	Name       string     `gorm:"column:name" db:"name" json:"name"`
+	NRP        string     `gorm:"column:nrp" db:"nrp" json:"nrp"`
+	Field      string     `gorm:"column:field" db:"field" json:"field"`
+	CreatedAt  *time.Time `gorm:"column:created_at" db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt  *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
+
+	// Tambahan sendiri di luar DB Admin
+	DivisionSlug *string `db:"-" json:"division_slug,omitempty"`
 }
 
 type DetailRegistration struct {
+	ID               string     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	NRP              string     `gorm:"column:nrp" db:"nrp" json:"nrp"`
+	UkmID            string     `gorm:"column:ukm_id" db:"ukm_id" json:"ukm_id"`
+	Payment          string     `gorm:"column:payment" db:"payment" json:"payment"`
+	DriveURL         string     `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
+	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
+	PaymentValidated int        `gorm:"column:payment_validated" db:"payment_validated" json:"payment_validated"`
+	CreatedAt        *time.Time `gorm:"column:created_at" db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt        *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
+}
+
+type Participant struct {
 	ID               string     `db:"id" json:"id"`
 	NRP              string     `db:"nrp" json:"nrp"`
-	UkmID            string     `db:"ukm_id" json:"ukm_id"`
-	Payment          int        `db:"payment" json:"payment"`
-	Code             string     `db:"code" json:"code"`
-	DriveURL         string     `db:"drive_url" json:"drive_url"`
-	FileValidated    int        `db:"file_validated" json:"file_validated"`
+	Name             string     `db:"name" json:"name"`
+	LineID           string     `db:"line_id" json:"line_id"`
+	Phone            string     `db:"phone" json:"phone"`
+	UkmId            string     `db:"ukm_id" json:"ukm_id"`
+	UkmName          string     `db:"ukm_name" json:"ukm_name"`
+	Payment          *string    `db:"payment" json:"payment"`
+	DriveURL         *string    `gorm:"column:drive_url" db:"drive_url" json:"drive_url"`
+	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
 }
-

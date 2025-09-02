@@ -1,0 +1,21 @@
+-- +goose Up
+ALTER TABLE ukms 
+  MODIFY COLUMN current_slot INT NULL,
+  MODIFY COLUMN max_slot INT NULL,
+  MODIFY COLUMN regist_fee INT NULL;
+
+ALTER TABLE ukms 
+  ADD COLUMN image_urls JSON NULL,
+  ADD COLUMN video_url VARCHAR(255) NULL,
+  ADD COLUMN qris_url VARCHAR(255) NULL;
+
+-- +goose Down
+ALTER TABLE ukms 
+  DROP COLUMN image_urls,
+  DROP COLUMN video_url,
+  DROP COLUMN qris_url;
+
+ALTER TABLE ukms 
+  MODIFY COLUMN current_slot INT NOT NULL DEFAULT 0,
+  MODIFY COLUMN max_slot INT NOT NULL DEFAULT 0,
+  MODIFY COLUMN regist_fee INT NOT NULL DEFAULT 0;

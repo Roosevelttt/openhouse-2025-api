@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"openhouse-2025-api/internal/config"
 	"openhouse-2025-api/internal/http/server/handlers"
 	"openhouse-2025-api/internal/repositories"
@@ -8,26 +9,56 @@ import (
 )
 
 type Server struct {
-	Session *handlers.SessionHandler
-	Auth *handlers.AuthHandler
-	Ukm  *handlers.UkmHandler
+	Session      *handlers.SessionHandler
+	Auth         *handlers.AuthHandler
+	User         *handlers.UserHandler
+	Ukm          *handlers.UkmHandler
+	Participants *handlers.ParticipantsHandler
+	Validation   *handlers.PaymentHandler
+	Export       *handlers.ExportHandler
+	Groupchat    *handlers.GroupchatHandler
+	Registration *handlers.RegistrationHandler
 }
 
 func NewServer(cfg *config.Config) *Server {
-	db := repositories.MustConnectMySQL(cfg)
+	// Call our new connection function here
+	sqlDB, gormDB, err := repositories.NewDatabaseConnections(cfg)
+	if err != nil {
+		// Since this is the root, panicking on a failed DB connection is acceptable.
+		log.Fatalf("Could not connect to the database: %v", err)
+	}
 
-	userRepo := repositories.NewUserRepository(db)
-	ukmRepo := repositories.NewUkmRepository(db)
-	regRepo := repositories.NewRegistrationRepository(db)
+	// --- Repositories that use RAW SQL get the *sql.DB ---
+	userRepo := repositories.NewUserRepository(sqlDB)
+	adminRepo := repositories.NewAdminRepository(sqlDB)
+	ukmRepo := repositories.NewUkmRepository(gormDB) // Pake GORM
+	regRepo := repositories.NewRegistrationRepository(sqlDB)
+	participantsRepo := repositories.NewParticipantsRepository(sqlDB)
 
+	// --- New repositories that use GORM get the *gorm.DB ---
+	validationRepo := repositories.NewValidationRepository(gormDB)
+
+	// --- Services ---
 	sessionSvc := services.NewSessionService()
-	authSvc := services.NewAuthService(cfg, userRepo)
+	authSvc := services.NewAuthService(cfg, userRepo, adminRepo)
+	userSvc := services.NewUserService(userRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
+	participantsSvc := services.NewParticipantsService(participantsRepo)
+	mailSvc := services.NewMailService(cfg)
+	validationSvc := services.NewValidationService(gormDB, validationRepo, userRepo, ukmRepo, mailSvc)
+	exportSvc := services.NewExportService(participantsRepo)
+	groupchatSvc := services.NewGroupchatService(ukmRepo)
 
+	// --- Handlers ---
 	return &Server{
-		Session: handlers.NewSessionHandler(sessionSvc),
-		Auth: handlers.NewAuthHandler(authSvc),
-		Ukm:  handlers.NewUkmHandler(ukmSvc),
+		Session:      handlers.NewSessionHandler(sessionSvc),
+		Auth:         handlers.NewAuthHandler(authSvc),
+		User:         handlers.NewUserHandler(userSvc),
+		Ukm:          handlers.NewUkmHandler(ukmSvc),
+		Participants: handlers.NewParticipantsHandler(participantsSvc),
+		Validation:   handlers.NewPaymentHandler(validationSvc),
+		Export:       handlers.NewExportHandler(exportSvc),
+		Groupchat:    handlers.NewGroupchatHandler(groupchatSvc),
+		Registration: handlers.NewRegistrationHandler(regRepo),
 	}
 }
-

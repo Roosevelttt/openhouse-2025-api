@@ -1,58 +1,61 @@
-	package services
+package services
 
-	import (
-		"strings"
-		"net/http"
-		"os"
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
 
-		"github.com/gin-gonic/gin"
-		"github.com/markbates/goth"
-		"github.com/markbates/goth/gothic"
-		"github.com/markbates/goth/providers/google"
+	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/google"
 
-		"openhouse-2025-api/internal/config"
-		"openhouse-2025-api/internal/repositories"
+	"openhouse-2025-api/internal/config"
+	"openhouse-2025-api/internal/models"
+	"openhouse-2025-api/internal/repositories"
 
-		"github.com/gin-contrib/sessions"
-	)
+	"github.com/gin-contrib/sessions"
+)
 
-	type AuthService struct {
-		cfg *config.Config
-		users *repositories.UserRepository
+type AuthService struct {
+	cfg    *config.Config
+	users  *repositories.UserRepository
+	admins *repositories.AdminRepository
+}
+
+func NewAuthService(cfg *config.Config, users *repositories.UserRepository, admins *repositories.AdminRepository) *AuthService {
+	return &AuthService{cfg: cfg, users: users, admins: admins}
+}
+
+func init() {
+	goth.UseProviders(google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), os.Getenv("GOOGLE_REDIRECT_URL"), "email", "profile"))
+}
+
+func (s *AuthService) BeginGoogleAuth(c *gin.Context) {
+	q := c.Request.URL.Query()
+	q.Add("provider", "google")
+	c.Request.URL.RawQuery = q.Encode()
+	gothic.BeginAuthHandler(c.Writer, c.Request)
+}
+
+func (s *AuthService) OAuthCallback(c *gin.Context) {
+
+	q := c.Request.URL.Query()
+	q.Add("provider", "google")
+	c.Request.URL.RawQuery = q.Encode()
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+	// res, err  :=  json.Marshal(user)
+	// if  err  !=  nil {
+	//     c.AbortWithError(http.StatusInternalServerError, err)
+	//     return
+	// }
 
-	func NewAuthService(cfg *config.Config, users *repositories.UserRepository) *AuthService {
-		return &AuthService{cfg: cfg, users: users}
-	}
-
-	func init() {
-		goth.UseProviders(google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), os.Getenv("GOOGLE_REDIRECT_URL"), "email", "profile"))
-	}
-
-	func (s *AuthService) BeginGoogleAuth(c  *gin.Context) {
-		q  :=  c.Request.URL.Query()
-		q.Add("provider", "google")
-		c.Request.URL.RawQuery  =  q.Encode()
-		gothic.BeginAuthHandler(c.Writer, c.Request)
-	}
-
-	func (s *AuthService) OAuthCallback(c  *gin.Context) {
-
-		q  :=  c.Request.URL.Query()
-		q.Add("provider", "google")
-		c.Request.URL.RawQuery  =  q.Encode()
-		user, err  :=  gothic.CompleteUserAuth(c.Writer, c.Request)
-		if  err  !=  nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-		// res, err  :=  json.Marshal(user)
-		// if  err  !=  nil {
-		//     c.AbortWithError(http.StatusInternalServerError, err)
-		//     return
-		// }
-
-		// jsonString  :=  string(res)
+	// jsonString  :=  string(res)
 
 		// set session
 		email := user.Email
@@ -67,28 +70,34 @@
 		session := sessions.Default(c)
 		session.Set("role", "user")
 		session.Set("nrp", nrp)
-
-		session.Save()
-		
-
-		// sessionData := session.Get("nrp")
-		// c.JSON(http.StatusAccepted, sessionData)
-
-		// gw gtw mau arahin ke mana hehe
-		c.Redirect(http.StatusFound, os.Getenv("CORS_ORIGINS") + "")
-		
+		session.Set("name", user.Name)
+		session.Set("email", user.Email)
 	}
 
-	func (s *AuthService) Logout(c  *gin.Context) {
-		session := sessions.Default(c)
-		session.Clear()
-		session.Save()
+	session.Save()
 
-		c.JSON(http.StatusAccepted, gin.H{
-			"message": "User signed out successfully",
-		})
+	// sessionData := session.Get("nrp")
+	// c.JSON(http.StatusAccepted, sessionData)
+
+	// Handle redirect after login
+	redirectURL := os.Getenv("CORS_ORIGINS")
+
+	// If user is admin, check if there was a stored redirect intention
+	if admin != nil {
+		// For now, redirect admin users to admin dashboard
+		redirectURL = os.Getenv("CORS_ORIGINS") + "/admin"
 	}
 
+	c.Redirect(http.StatusFound, redirectURL)
 
+}
 
+func (s *AuthService) Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Save()
 
+	c.JSON(http.StatusAccepted, gin.H{
+		"message": "User signed out successfully",
+	})
+}
