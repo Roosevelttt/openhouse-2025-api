@@ -23,17 +23,17 @@ func SessionManager(cfg *config.Config) gin.HandlerFunc {
 		log.Fatal("SESSION_HASH_KEY environment variable is not set.")
 	}
 
-    vmUsername := os.Getenv("VM_USERNAME")
+    redisUsername := os.Getenv("REDIS_USERNAME")
     redisAddr := os.Getenv("REDIS_ADDR")
     redisPassword := os.Getenv("REDIS_PASSWORD")
-    if vmUsername == "" || redisAddr == "" {
+    if redisUsername == "" || redisAddr == "" {
         log.Fatal("Please complete REDIS credentials.")
     }
 
 
     
     // store := cookie.NewStore([]byte(hashKey))
-    store, err := redis.NewStore(10, "tcp", redisAddr, vmUsername, redisPassword, []byte(hashKey))
+    store, err := redis.NewStore(10, "tcp", redisAddr, redisUsername, redisPassword, []byte(hashKey))
     if err != nil {
         log.Fatalf("Could not connect to Redis: %v", err)
     }
