@@ -76,3 +76,27 @@ type Participant struct {
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
 }
+
+type SlotReservation struct {
+	ReservationID string    `db:"reservation_id" json:"reservation_id"`
+	NRP           string    `db:"nrp" json:"nrp"`
+	UkmID         string    `db:"ukm_id" json:"ukm_id"`
+	ExpiresAt     time.Time `db:"expires_at" json:"expires_at"`
+	CreatedAt     time.Time `db:"created_at" json:"created_at"`
+}
+
+type ReserveSlotRequest struct {
+	UkmID string `json:"ukm_id" binding:"required"`
+}
+
+type ReserveSlotResponse struct {
+	ReservationID string    `json:"reservation_id"`
+	ExpiresAt     time.Time `json:"expires_at"`
+}
+
+type SlotReservationResult struct {
+	ReservationID string    `json:"reservation_id"`
+	ExpiresAt     time.Time `json:"expires_at"`
+	CurrentSlot   int       `json:"current_slot"`
+	MaxSlot       int       `json:"max_slot"`
+}

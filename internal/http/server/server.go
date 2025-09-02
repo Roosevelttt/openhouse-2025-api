@@ -43,7 +43,7 @@ func NewServer(cfg *config.Config) *Server {
 	authSvc := services.NewAuthService(cfg, userRepo, adminRepo)
 	userSvc := services.NewUserService(userRepo)
 	ukmSvc := services.NewUkmService(ukmRepo, regRepo)
-	participantsSvc := services.NewParticipantsService(participantsRepo)
+	participantsSvc := services.NewParticipantsService(participantsRepo, regRepo)
 	mailSvc := services.NewMailService(cfg)
 	validationSvc := services.NewValidationService(gormDB, validationRepo, userRepo, ukmRepo, mailSvc)
 	exportSvc := services.NewExportService(participantsRepo)
