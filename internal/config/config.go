@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Env                string
+	GinMode            string
 	HTTPPort           string
 	DBHost             string
 	DBPort             string
@@ -39,6 +40,7 @@ func Load() *Config {
 
 	cfg := &Config{
 		Env:                getenv("ENV", "development"),
+		GinMode:            getenv("GIN_MODE", "debug"),
 		HTTPPort:           getenv("HTTP_PORT", "8080"),
 		DBHost:             getenv("DB_HOST", "127.0.0.1"),
 		DBPort:             getenv("DB_PORT", "3306"),
@@ -55,7 +57,7 @@ func Load() *Config {
 		SMTPPass:           getenv("SMTP_PASS", ""),
 		SMTPFrom:           getenv("SMTP_FROM", ""),
 	}
-	log.Printf("config loaded: ENV=%s HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.Env, cfg.HTTPPort, cfg.DBHost, cfg.DBName)
+	log.Printf("config loaded: ENV=%s GIN_MODE=%s HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.Env, cfg.GinMode, cfg.HTTPPort, cfg.DBHost, cfg.DBName)
 	return cfg
 }
 
