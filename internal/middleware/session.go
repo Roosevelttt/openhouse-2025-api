@@ -14,22 +14,26 @@ import (
 )
 
 func SessionManager(cfg *config.Config) gin.HandlerFunc {
+
+    isDevelopment := cfg.IsDevelopment()
+
 	// hashkey hrs ada
 	hashKey := os.Getenv("SESSION_HASH_KEY")
 	if hashKey == "" {
 		log.Fatal("SESSION_HASH_KEY environment variable is not set.")
 	}
 
-    // redisAddr := os.Getenv("REDIS_ADDR")
-    redisAddr := "localhost:8001"
-    // log.Fatal("REDIS_ADDR :" + redisAddr)
-    if redisAddr == "" {
-        log.Fatal("REDIS_ADDR environment variable is not set.")
+    vmUsername := os.Getenv("VM_USERNAME")
+    redisAddr := os.Getenv("REDIS_ADDR")
+    redisPassword := os.Getenv("REDIS_PASSWORD")
+    if vmUsername == "" || redisAddr == "" {
+        log.Fatal("Please complete REDIS credentials.")
     }
+
 
     
     // store := cookie.NewStore([]byte(hashKey))
-    store, err := redis.NewStore(10, "tcp", redisAddr, "waxomoly", "", []byte(hashKey))
+    store, err := redis.NewStore(10, "tcp", redisAddr, vmUsername, redisPassword, []byte(hashKey))
     if err != nil {
         log.Fatalf("Could not connect to Redis: %v", err)
     }
@@ -39,7 +43,7 @@ func SessionManager(cfg *config.Config) gin.HandlerFunc {
         Path:     "/",
         HttpOnly: true,  
         SameSite: 0, 
-		Secure:   true,
+		Secure:   !isDevelopment,
     })
     gothic.Store = store
 
