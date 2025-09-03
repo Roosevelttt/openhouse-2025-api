@@ -101,7 +101,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	registration := &models.DetailRegistration{
 		NRP:      nrp,
 		UkmID:    ukmID,
-		Payment:  filename, // Store filename instead of integer
+		Payment:  &filename, // Store filename as pointer to string
 		DriveURL: driveURL,
 	}
 
