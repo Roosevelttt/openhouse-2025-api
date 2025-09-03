@@ -146,7 +146,7 @@ func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
 			"expires_at":     result.ExpiresAt,
 			"current_slot":   result.CurrentSlot,
 			"max_slot":       result.MaxSlot,
-			"time_remaining": int(result.ExpiresAt.Sub(time.Now()).Minutes()),
+			"time_remaining": int(time.Until(result.ExpiresAt).Minutes()),
 		})
 	} else {
 		c.JSON(http.StatusConflict, gin.H{

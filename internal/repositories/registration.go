@@ -101,7 +101,7 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 
 	var currentReserved int
 	err = tx.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM slot_reservations WHERE ukm_id = ? AND expires_at > NOW()
+		SELECT COUNT(*) FROM slot_reservations WHERE ukm_id = ? AND expires_at > UTC_TIMESTAMP()
 	`, ukmID).Scan(&currentReserved)
 	if err != nil {
 		return "", err
@@ -126,7 +126,7 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 	var existingReservation string
 	err = tx.QueryRowContext(ctx, `
 		SELECT reservation_id FROM slot_reservations 
-		WHERE nrp = ? AND ukm_id = ? AND expires_at > NOW()
+		WHERE nrp = ? AND ukm_id = ? AND expires_at > UTC_TIMESTAMP()
 	`, nrp, ukmID).Scan(&existingReservation)
 	if err == nil {
 		// User already has a valid reservation
@@ -141,7 +141,7 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 
 	_, err = tx.ExecContext(ctx, `
 		INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-		VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+		VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
 	`, reservationID, nrp, ukmID)
 	if err != nil {
 		return "", err
@@ -291,7 +291,7 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 
 	var currentReserved int
 	err = tx.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM slot_reservations WHERE ukm_id = ? AND expires_at > NOW()
+		SELECT COUNT(*) FROM slot_reservations WHERE ukm_id = ? AND expires_at > UTC_TIMESTAMP()
 	`, ukmID).Scan(&currentReserved)
 	if err != nil {
 		return nil, err
@@ -314,7 +314,7 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 	var existingExpiry time.Time
 	err = tx.QueryRowContext(ctx, `
 		SELECT reservation_id, expires_at FROM slot_reservations 
-		WHERE nrp = ? AND ukm_id = ? AND expires_at > NOW()
+		WHERE nrp = ? AND ukm_id = ? AND expires_at > UTC_TIMESTAMP()
 	`, nrp, ukmID).Scan(&existingReservation, &existingExpiry)
 	if err == nil {
 		// User already has a valid reservation, return existing details
@@ -338,14 +338,14 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 
 	err = tx.QueryRowContext(ctx, `
 		INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-		VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+		VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
 		RETURNING expires_at
 	`, reservationID, nrp, ukmID).Scan(&expiresAt)
 	if err != nil {
 		// Fallback for databases that don't support RETURNING
 		_, err = tx.ExecContext(ctx, `
 			INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-			VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+			VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
 		`, reservationID, nrp, ukmID)
 		if err != nil {
 			return nil, err

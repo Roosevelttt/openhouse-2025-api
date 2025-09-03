@@ -81,7 +81,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	}
 
 	// Generate unique filename
-	filename := fmt.Sprintf("%s_%s_%s%s", nrp, ukmID, ext)
+	filename := fmt.Sprintf("%s_%s_%s", nrp, ukmID, ext)
 	filePath := filepath.Join(uploadsDir, filename)
 
 	// Save file
