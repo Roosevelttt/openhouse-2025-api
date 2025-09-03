@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"openhouse-2025-api/internal/models"
@@ -120,12 +119,11 @@ func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
 		return
 	}
 
-	ukmIDStr := c.Param("ukm_id")
-	ukmID, err := strconv.Atoi(ukmIDStr)
-	if err != nil {
+	ukmID := c.Param("ukm_id")
+	if ukmID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid UKM ID",
+			"message": "UKM ID is required",
 		})
 		return
 	}

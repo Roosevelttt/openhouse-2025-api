@@ -75,13 +75,13 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 	}
 	defer tx.Rollback()
 
-	// Check current registrations + reservations vs quota
-	var currentRegistered int
+	// Get UKM current slot and quota with SELECT FOR UPDATE to prevent race conditions
+	var currentSlot, quota int
 	err = tx.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM detail_registrations WHERE ukm_id = ? AND payment_validated = 1
-	`, ukmID).Scan(&currentRegistered)
+		SELECT COALESCE(current_slot, 0), max_slot FROM ukms WHERE id = ? FOR UPDATE
+	`, ukmID).Scan(&currentSlot, &quota)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("UKM not found")
 	}
 
 	var currentReserved int
@@ -92,18 +92,19 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 		return "", err
 	}
 
-	// Get UKM quota
-	var quota int
-	err = tx.QueryRowContext(ctx, `
-		SELECT max_slot FROM ukms WHERE id = ?
-	`, ukmID).Scan(&quota)
-	if err != nil {
-		return "", fmt.Errorf("UKM not found")
+	// Check if slots are available (implement race condition control)
+	totalTaken := currentSlot + currentReserved
+	if totalTaken >= quota {
+		return "", fmt.Errorf("no slots available")
 	}
 
-	// Check if slots are available
-	if currentRegistered+currentReserved >= quota {
-		return "", fmt.Errorf("no slots available")
+	// For race condition control: limit concurrent reservations to remaining slots
+	remainingSlots := quota - currentSlot
+	fmt.Printf("DEBUG ReserveSlot: currentSlot=%d, currentReserved=%d, quota=%d, remainingSlots=%d\n",
+		currentSlot, currentReserved, quota, remainingSlots)
+	if currentReserved >= remainingSlots {
+		fmt.Printf("DEBUG ReserveSlot: BLOCKING - too many concurrent reservations\n")
+		return "", fmt.Errorf("no slots available - too many concurrent reservations")
 	}
 
 	// Check if user already has a reservation for this UKM
@@ -120,14 +121,13 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 		return "", err
 	}
 
-	// Create new reservation
+	// Create new reservation with database-calculated expiry time
 	reservationID := uuid.New().String()
-	expiresAt := time.Now().Add(1 * time.Minute)
 
 	_, err = tx.ExecContext(ctx, `
 		INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-		VALUES (?, ?, ?, ?)
-	`, reservationID, nrp, ukmID, expiresAt)
+		VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+	`, reservationID, nrp, ukmID)
 	if err != nil {
 		return "", err
 	}
@@ -230,20 +230,20 @@ func (r *RegistrationRepository) ConsumeReservation(ctx context.Context, reserva
 }
 
 // ReserveSlotForPayment reserves a slot for payment page access with full details
-func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp string, ukmID int) (*models.SlotReservationResult, error) {
+func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp string, ukmID string) (*models.SlotReservationResult, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
 
-	// Check current registrations + reservations vs quota
-	var currentRegistered int
+	// Get UKM current slot and quota with SELECT FOR UPDATE to prevent race conditions
+	var currentSlot, quota int
 	err = tx.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM detail_registrations WHERE ukm_id = ? AND payment_validated = 1
-	`, ukmID).Scan(&currentRegistered)
+		SELECT COALESCE(current_slot, 0), max_slot FROM ukms WHERE id = ? FOR UPDATE
+	`, ukmID).Scan(&currentSlot, &quota)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("UKM not found")
 	}
 
 	var currentReserved int
@@ -254,25 +254,16 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 		return nil, err
 	}
 
-	// Get UKM quota
-	var quota int
-	err = tx.QueryRowContext(ctx, `
-		SELECT max_slot FROM ukms WHERE id = ?
-	`, ukmID).Scan(&quota)
-	if err != nil {
-		return nil, fmt.Errorf("UKM not found")
-	}
-
 	// Check if slots are available (implement race condition control)
-	totalTaken := currentRegistered + currentReserved
+	totalTaken := currentSlot + currentReserved
 	if totalTaken >= quota {
 		return nil, nil // Return nil to indicate no slots available
 	}
 
-	// For race condition control: when near capacity, limit concurrent payment page access
-	remainingSlots := quota - currentRegistered
-	if remainingSlots <= 2 && currentReserved >= 2 {
-		return nil, nil // Limit concurrent payment access when nearly full
+	// For race condition control: limit concurrent reservations to remaining slots
+	remainingSlots := quota - currentSlot
+	if currentReserved >= remainingSlots {
+		return nil, nil // Limit concurrent payment access to remaining slots
 	}
 
 	// Check if user already has a reservation for this UKM
@@ -290,7 +281,7 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 		return &models.SlotReservationResult{
 			ReservationID: existingReservation,
 			ExpiresAt:     existingExpiry,
-			CurrentSlot:   currentRegistered,
+			CurrentSlot:   currentSlot,
 			MaxSlot:       quota,
 		}, nil
 	}
@@ -333,7 +324,7 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 	return &models.SlotReservationResult{
 		ReservationID: reservationID,
 		ExpiresAt:     expiresAt,
-		CurrentSlot:   currentRegistered,
+		CurrentSlot:   currentSlot,
 		MaxSlot:       quota,
 	}, nil
 }
