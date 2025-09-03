@@ -64,7 +64,7 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 		institution := parts[1]
 
 		if institution != "john.petra.ac.id" {
-			c.Redirect(http.StatusUnauthorized, os.Getenv("CORS_ORIGINS") + "/login")
+			c.Redirect(http.StatusForbidden, os.Getenv("CORS_ORIGINS") + "/login?error=not_student")
 		}
 		
 		session := sessions.Default(c)
