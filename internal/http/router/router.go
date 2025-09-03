@@ -46,6 +46,21 @@ func New(cfg *config.Config) http.Handler {
 			userRoutes.POST("/biodata", s.User.UpdateBiodata)
 		}
 
+		// Registration routes
+		registrationRoutes := api.Group("/registrations")
+		registrationRoutes.Use(middleware.AuthMiddleware("user", "admin"))
+		{
+			registrationRoutes.POST("/reserve", s.Participants.ReserveSlot)
+			registrationRoutes.POST("/access-payment/:ukm_id", s.Participants.AccessPaymentPage)
+			registrationRoutes.POST("/with-reservation/:reservationId", s.Participants.RegisterWithReservation)
+		}
+
+		// Public registration routes (no auth needed)
+		{
+			api.GET("/registrations/test", s.Registration.Test)
+			api.POST("/registrations", s.Registration.Create)
+		}
+
 		// Admin routes
 		adminRoutes := api.Group("/admin")
 		adminRoutes.Use(middleware.AuthMiddleware("admin"))
@@ -78,8 +93,6 @@ func New(cfg *config.Config) http.Handler {
 			}
 		}
 
-		api.GET("/registrations/test", s.Registration.Test)
-		api.POST("/registrations", s.Registration.Create)
 	}
 
 	return r

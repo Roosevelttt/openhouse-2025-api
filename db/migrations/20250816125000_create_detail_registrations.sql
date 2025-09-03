@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS detail_registrations (
   id CHAR(36) NOT NULL PRIMARY KEY,
-  nrp VARCHAR(9) NOT NULL,
+  nrp VARCHAR(255) NOT NULL,
   ukm_id CHAR(36) NOT NULL,
   payment VARCHAR(255) NULL,
   drive_url VARCHAR(255) NULL,
