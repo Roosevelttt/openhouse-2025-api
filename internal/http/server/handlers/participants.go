@@ -131,7 +131,7 @@ func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
 	}
 
 	// Try to reserve slot for payment page access
-	result, err := h.registrationRepo.Create(nrp, ukmID)
+	result, err := h.registrationRepo.ReserveSlotForPayment(c.Request.Context(), nrp, ukmID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

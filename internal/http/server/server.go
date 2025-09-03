@@ -55,7 +55,7 @@ func NewServer(cfg *config.Config) *Server {
 		Auth:         handlers.NewAuthHandler(authSvc),
 		User:         handlers.NewUserHandler(userSvc),
 		Ukm:          handlers.NewUkmHandler(ukmSvc),
-		Participants: handlers.NewParticipantsHandler(participantsSvc),
+		Participants: handlers.NewParticipantsHandler(participantsSvc, regRepo),
 		Validation:   handlers.NewPaymentHandler(validationSvc),
 		Export:       handlers.NewExportHandler(exportSvc),
 		Groupchat:    handlers.NewGroupchatHandler(groupchatSvc),

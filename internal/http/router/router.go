@@ -49,6 +49,7 @@ func New(cfg *config.Config) http.Handler {
 		registrationRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			registrationRoutes.POST("/reserve", s.Participants.ReserveSlot)
+			registrationRoutes.POST("/access-payment/:ukm_id", s.Participants.AccessPaymentPage)
 			registrationRoutes.POST("/with-reservation/:reservationId", s.Participants.RegisterWithReservation)
 		}
 
