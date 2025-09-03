@@ -49,6 +49,21 @@ func (r *RegistrationRepository) Create(ctx context.Context, reg *models.DetailR
 	return tx.Commit()
 }
 
+// CheckExistingRegistration checks if a user has already registered for a UKM
+func (r *RegistrationRepository) CheckExistingRegistration(ctx context.Context, nrp, ukmID string) (bool, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM detail_registrations 
+		WHERE nrp = ? AND ukm_id = ?
+	`, nrp, ukmID).Scan(&count)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func (r *RegistrationRepository) CountParticipantsByUkm(ctx context.Context) (map[string]int, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT ukm_id, COUNT(*) as cnt FROM detail_registrations WHERE payment_validated=1 GROUP BY ukm_id`)
 	if err != nil {
@@ -194,6 +209,20 @@ func (r *RegistrationRepository) ConsumeReservation(ctx context.Context, reserva
 		return fmt.Errorf("reservation UKM mismatch")
 	}
 
+	// Check if user has already registered for this UKM
+	var existingRegistrations int
+	err = tx.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM detail_registrations 
+		WHERE nrp = ? AND ukm_id = ?
+	`, reg.NRP, reg.UkmID).Scan(&existingRegistrations)
+	if err != nil {
+		return err
+	}
+
+	if existingRegistrations > 0 {
+		return fmt.Errorf("user has already registered for this UKM")
+	}
+
 	// Create registration
 	reg.ID = uuid.New().String()
 	now := time.Now()
@@ -236,6 +265,20 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 		return nil, err
 	}
 	defer tx.Rollback()
+
+	// Check if user has already registered for this UKM
+	var existingRegistrations int
+	err = tx.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM detail_registrations 
+		WHERE nrp = ? AND ukm_id = ?
+	`, nrp, ukmID).Scan(&existingRegistrations)
+	if err != nil {
+		return nil, err
+	}
+
+	if existingRegistrations > 0 {
+		return nil, fmt.Errorf("user has already registered for this UKM")
+	}
 
 	// Get UKM current slot and quota with SELECT FOR UPDATE to prevent race conditions
 	var currentSlot, quota int
