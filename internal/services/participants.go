@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
-	"time"
 )
 
 type ParticipantsService struct {
@@ -25,17 +25,18 @@ func (s *ParticipantsService) ListParticipants(ctx context.Context, adminDivisio
 
 // ReserveSlot reserves a slot for the user
 func (s *ParticipantsService) ReserveSlot(ctx context.Context, nrp, ukmID string) (*models.ReserveSlotResponse, error) {
-	reservationID, err := s.registration.ReserveSlot(ctx, nrp, ukmID)
+	result, err := s.registration.ReserveSlotForPayment(ctx, nrp, ukmID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Calculate expiry time (10 minutes from now)
-	expiresAt := time.Now().Add(10 * time.Minute)
+	if result == nil {
+		return nil, fmt.Errorf("no slots available")
+	}
 
 	return &models.ReserveSlotResponse{
-		ReservationID: reservationID,
-		ExpiresAt:     expiresAt,
+		ReservationID: result.ReservationID,
+		ExpiresAt:     result.ExpiresAt, // Use actual database time
 	}, nil
 }
 

@@ -12,12 +12,13 @@ func NewAdminRepository(db *sql.DB) *AdminRepository { return &AdminRepository{d
 
 func (r *AdminRepository) FindByNRP(ctx context.Context, nrp string) (*models.Admin, error) {
 	row := r.db.QueryRowContext(ctx, `
-			SELECT a.id, a.ukm_id, a.division_id, d.slug AS division_slug, a.name, a.nrp, a.field, a.created_at, a.updated_at 
+			SELECT a.id, a.ukm_id, u.name AS ukm_name, a.division_id, d.slug AS division_slug, a.name, a.nrp, a.field, a.created_at, a.updated_at 
 			FROM admins a
 			LEFT JOIN divisions d ON d.id=a.division_id
+			LEFT JOIN ukms u ON u.id=a.ukm_id
 			WHERE nrp=?`, nrp)
 	var a models.Admin
-	if err := row.Scan(&a.ID, &a.UkmID, &a.DivisionID, &a.DivisionSlug, &a.Name, &a.NRP, &a.Field, &a.CreatedAt, &a.UpdatedAt); err != nil {
+	if err := row.Scan(&a.ID, &a.UkmID, &a.UkmName, &a.DivisionID, &a.DivisionSlug, &a.Name, &a.NRP, &a.Field, &a.CreatedAt, &a.UpdatedAt); err != nil {
 		return nil, err
 	}
 	return &a, nil

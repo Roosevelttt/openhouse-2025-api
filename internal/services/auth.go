@@ -57,55 +57,64 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 
 	// jsonString  :=  string(res)
 
-	// set session
-	email := user.Email
-	nrp := strings.Split(email, "@")[0]
+		// set session
+		email := user.Email
+		parts := strings.Split(email, "@")
+		nrp := parts[0]
+		institution := parts[1]
 
-	session := sessions.Default(c)
+		if institution != "john.petra.ac.id" {
+			c.Redirect(http.StatusUnauthorized, os.Getenv("CORS_ORIGINS") + "/login")
+		}
+		
+		session := sessions.Default(c)
 
-	// Check if user is admin by matching NRP with admin table
-	admin, err := s.admins.FindByNRP(c.Request.Context(), nrp)
-	if err == nil && admin != nil {
-		// User is admin
-		session.Set("role", "admin")
-		session.Set("nrp", nrp)
-		session.Set("admin_id", admin.ID)
-		session.Set("admin_name", admin.Name)
+		// Check if user is admin by matching NRP with admin table
+		admin, err := s.admins.FindByNRP(c.Request.Context(), nrp)
+		if err == nil && admin != nil {
+			// User is admin
+			session.Set("role", "admin")
+			session.Set("nrp", nrp)
+			session.Set("admin_id", admin.ID)
+			session.Set("admin_name", admin.Name)
 
-		if admin.UkmID != nil {
-			session.Set("admin_ukm_id", *admin.UkmID)
+			if admin.UkmID != nil {
+				session.Set("admin_ukm_id", *admin.UkmID)
+				session.Set("admin_ukm_name", *admin.UkmName)
 		} else {
-			session.Set("admin_ukm_id", nil)
+				session.Set("admin_ukm_id", nil)
+				session.Set("admin_ukm_name", nil)
 		}
 
-		if admin.DivisionID != nil {
-			session.Set("admin_division_id", *admin.DivisionID)
-			session.Set("admin_division_slug", *admin.DivisionSlug)
+			if admin.DivisionID != nil {
+				session.Set("admin_division_id", *admin.DivisionID)
+				session.Set("admin_division_slug", *admin.DivisionSlug)
+			} else {
+				session.Set("admin_division_id", nil)
+				session.Set("admin_division_slug", nil)
+			}
 		} else {
-			session.Set("admin_division_id", nil)
-			session.Set("admin_division_slug", nil)
-		}
-	} else {
-		// Regular user - create/update user record in database
-		userModel := &models.User{
-			NRP:    nrp,
-			Name:   user.Name, // Get name from Google OAuth
-			LineID: "",        // Will be empty initially, user can update later
-			Phone:  "",        // Will be empty initially, user can update later
-		}
+			// Regular user - create/update user record in database
+			userModel := &models.User{
+				NRP:    nrp,
+				Name:   user.Name, // Get name from Google OAuth
+				LineID: "",        // Will be empty initially, user can update later
+				Phone:  "",        // Will be empty initially, user can update later
+			}
 
-		// Create or update user in database
-		if err := s.users.UpsertByNRP(c.Request.Context(), userModel); err != nil {
-			// Log the error but don't fail the login process
-			// You might want to handle this differently in production
-			fmt.Printf("Warning: Failed to create/update user in database: %v\n", err)
-		}
+			// Create or update user in database
+			if err := s.users.UpsertByNRP(c.Request.Context(), userModel); err != nil {
+				// Log the error but don't fail the login process
+				// You might want to handle this differently in production
+				fmt.Printf("Warning: Failed to create/update user in database: %v\n", err)
+			}
 
-		session.Set("role", "user")
-		session.Set("nrp", nrp)
-		session.Set("name", user.Name)
-		session.Set("email", user.Email)
-	}
+			session.Set("role", "user")
+			session.Set("nrp", nrp)
+			session.Set("name", user.Name)
+			session.Set("email", user.Email)
+		}
+		
 
 	session.Save()
 

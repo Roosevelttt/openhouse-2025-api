@@ -2,34 +2,112 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Pembaruan Status Pembayaran</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembaruan Status Pendaftaran UKM</title>
     <style>
-        body { font-family: sans-serif; color: #333; }
-        .container { padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; margin: auto; }
-        .header { font-size: 24px; font-weight: bold; }
-        .content { margin-top: 20px; line-height: 1.6; }
-        h4 { margin: 0; }
+        /* General styles for email client compatibility */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Fallback background color for older email clients */
+            background-color: #2a1d44;
+
+            background-image: url('https://i.imgur.com/y7NgY6O.png'),
+            linear-gradient(to top right, #5f4b8b 0%, #2a1d44 100%);
+            background-repeat: repeat-x, no-repeat;
+            background-position: bottom, center;
+            background-size: auto 120px, auto;
+        }
+        /* A wrapper to provide padding on mobile */
+        .wrapper {
+            padding: 150px 20px 140px 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+            border: 1px solid #e9ecef;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a202c;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+        .content {
+            margin-top: 20px;
+            line-height: 1.7;
+            color: #4a5568;
+            font-size: 16px;
+        }
+        .content h4 {
+            margin: 0;
+            font-weight: 500;
+        }
         .mt-10 { margin-top: 10px; }
         .mt-20 { margin-top: 20px; }
         .mb-5 { margin-bottom: 5px; }
+        .highlight {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .link-group {
+            margin-top: 25px;
+            font-size: 15px;
+            word-break: break-all; /* Ensures long links don't break the layout */
+        }
+        .link-group a {
+            color: #c0392b;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #718096;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #c0392b;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="content">
-        {{if .IsAccepted}}
-        <h4 class="mt-10">Hai {{ .UserName }}, pembayaranmu telah divalidasi !</h4>
-        <h4 class="mt-20 mb-5">Selamat! Kamu berhasil terdaftar pada {{ .UkmName }}.</h4>
-        <h4 class="mt-20 mb-5">Silahkan join grup UKM yang telah kamu ikuti.</h4>
-        <h4 class="mt-20 mb-5">Link Grup {{ .UkmName }} : {{ .LinkGroupChatUKM }} : </h4>
-        {{else}}
-        <h4 class="mt-10">Hai {{ .UserName }}, pembayaranmu ditolak !</h4>
-        <h4 class="mt-20 mb-5">Kamu gagal terdaftar pada {{ .UkmName }} karena bukti pembayaran yang tidak valid.</h4>
-        {{end}}
-    </div>
-    <div class="footer" style="margin-top: 20px; font-size: 12px; color: #888;">
-        Jika ada pertanyaan lebih lanjut, silahkan hubungi OA Line Openhouse
-        <a href="https://line.me/R/ti/p/@001pyqes">@001pyqes</a>
+<div class="wrapper">
+    <div class="container">
+        <div class="header">
+            Status Pendaftaran UKM
+        </div>
+        <div class="content">
+            {{if .IsAccepted}}
+            <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>!</h4>
+            <h4 class="mt-20 mb-5">Selamat! Kamu berhasil terdaftar pada <span class="highlight">{{ .UkmName }}</span>.</h4>
+            <h4 class="mt-20 mb-5">Silakan bergabung dengan grup UKM melalui link di bawah ini.</h4>
+            <div class="link-group">
+                <strong>Link Grup {{ .UkmName }}:</strong><br>
+                <a href="{{ .LinkGroupChatUKM }}">{{ .LinkGroupChatUKM }}</a>
+            </div>
+            {{else}}
+            <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>,</h4>
+            <h4 class="mt-20 mb-5">Mohon maaf, pendaftaran kamu untuk <span class="highlight">{{ .UkmName }}</span> tidak berhasil.</h4>
+            {{end}}
+        </div>
+        <div class="footer">
+            Jika ada pertanyaan lebih lanjut, silakan hubungi OA Line Openhouse
+            <a href="https://line.me/R/ti/p/@001pyqes">@001pyqes</a>.
+        </div>
     </div>
 </div>
 </body>

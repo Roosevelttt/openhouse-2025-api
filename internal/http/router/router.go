@@ -13,6 +13,8 @@ import (
 )
 
 func New(cfg *config.Config) http.Handler {
+	gin.SetMode(cfg.GinMode)
+	
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())

@@ -47,6 +47,7 @@ type Admin struct {
 	UpdatedAt  *time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at,omitempty"`
 
 	// Tambahan sendiri di luar DB Admin
+	UkmName      *string `db:"-" json:"ukm_name,omitempty"`
 	DivisionSlug *string `db:"-" json:"division_slug,omitempty"`
 }
 

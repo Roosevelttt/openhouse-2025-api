@@ -45,7 +45,7 @@ func NewValidationService(db *gorm.DB, statusRepo *repositories.ValidationReposi
 type AdminContext struct {
 	NRP   string
 	Name  string
-	UkmID string
+	UkmID *string
 }
 
 // ProcessValidation is the new, flexible method for all acceptance logic.
@@ -157,15 +157,28 @@ func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminCon
 
 // logValidationAction is now updated to accept the type of file being validated
 func (s *ValidationService) logValidationAction(admin AdminContext, detailReg *models.DetailRegistration, fileType string, mailType string) {
-	adminUkm, _ := s.ukmRepo.FindByID(context.Background(), admin.UkmID)
 	user, _ := s.userRepo.FindByNRP(context.Background(), detailReg.NRP)
 	dataUkm, _ := s.ukmRepo.FindByID(context.Background(), detailReg.UkmID)
 
-	logMsg := fmt.Sprintf("%s-%s-%s, has accepted %s of %s-%s-%s",
-		admin.NRP, admin.Name, adminUkm.Name,
-		fileType, // Use the dynamic file type
-		user.NRP, user.Name, dataUkm.Name)
-	log.Println(logMsg)
+	if admin.UkmID != nil {
+		adminUkm, _ := s.ukmRepo.FindByID(context.Background(), *admin.UkmID)
+
+		logMsg := fmt.Sprintf(
+			"%s-%s-%s has accepted %s of %s-%s-%s",
+			admin.NRP, admin.Name, adminUkm.Name,
+			fileType,
+			user.NRP, user.Name, dataUkm.Name,
+		)
+		log.Println(logMsg)
+	} else {
+		logMsg := fmt.Sprintf(
+			"%s-%s has accepted %s of %s-%s-%s",
+			admin.NRP, admin.Name,
+			fileType,
+			user.NRP, user.Name, dataUkm.Name,
+		)
+		log.Println(logMsg)
+	}
 
 	// --- Email Sending Logic ---
 	log.Printf("INFO: Sending acceptation email for %s to %s for UKM %s", mailType, user.NRP, dataUkm.Name)
@@ -179,15 +192,28 @@ func (s *ValidationService) logValidationAction(admin AdminContext, detailReg *m
 
 // logAndNotifyRejection is the helper for rejections.
 func (s *ValidationService) logAndNotifyRejection(admin AdminContext, nrp, ukmID, logFileType, mailType string) {
-	adminUkm, _ := s.ukmRepo.FindByID(context.Background(), admin.UkmID)
 	user, _ := s.userRepo.FindByNRP(context.Background(), nrp)
 	dataUkm, _ := s.ukmRepo.FindByID(context.Background(), ukmID)
 
-	logMsg := fmt.Sprintf("%s-%s-%s, has rejected %s of %s-%s-%s",
-		admin.NRP, admin.Name, adminUkm.Name,
-		logFileType,
-		user.NRP, user.Name, dataUkm.Name)
-	log.Println(logMsg)
+	if admin.UkmID != nil {
+		adminUkm, _ := s.ukmRepo.FindByID(context.Background(), *admin.UkmID)
+
+		logMsg := fmt.Sprintf(
+			"%s-%s-%s has rejected %s of %s-%s-%s",
+			admin.NRP, admin.Name, adminUkm.Name,
+			logFileType,
+			user.NRP, user.Name, dataUkm.Name,
+		)
+		log.Println(logMsg)
+	} else {
+		logMsg := fmt.Sprintf(
+			"%s-%s has rejected %s of %s-%s-%s",
+			admin.NRP, admin.Name,
+			logFileType,
+			user.NRP, user.Name, dataUkm.Name,
+		)
+		log.Println(logMsg)
+	}
 
 	// --- Email Sending Logic ---
 	log.Printf("INFO: Sending rejection email for %s to %s for UKM %s", mailType, user.NRP, dataUkm.Groupchat)
