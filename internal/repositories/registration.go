@@ -138,11 +138,12 @@ func (r *RegistrationRepository) ReserveSlot(ctx context.Context, nrp, ukmID str
 
 	// Create new reservation with database-calculated expiry time
 	reservationID := uuid.New().String()
+	expiresAt := time.Now().UTC().Add(5 * time.Minute) // 5 minutes from now in UTC
 
 	_, err = tx.ExecContext(ctx, `
 		INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-		VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
-	`, reservationID, nrp, ukmID)
+		VALUES (?, ?, ?, ?)
+	`, reservationID, nrp, ukmID, expiresAt)
 	if err != nil {
 		return "", err
 	}
@@ -332,32 +333,16 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 		return nil, err
 	}
 
-	// Create new reservation with database-calculated expiry time
+	// Create new reservation with Go-calculated expiry time to avoid timezone issues
 	reservationID := uuid.New().String()
-	var expiresAt time.Time
+	expiresAt := time.Now().UTC().Add(5 * time.Minute) // 5 minutes from now in UTC
 
-	err = tx.QueryRowContext(ctx, `
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-		VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
-		RETURNING expires_at
-	`, reservationID, nrp, ukmID).Scan(&expiresAt)
+		VALUES (?, ?, ?, ?)
+	`, reservationID, nrp, ukmID, expiresAt)
 	if err != nil {
-		// Fallback for databases that don't support RETURNING
-		_, err = tx.ExecContext(ctx, `
-			INSERT INTO slot_reservations (reservation_id, nrp, ukm_id, expires_at) 
-			VALUES (?, ?, ?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)
-		`, reservationID, nrp, ukmID)
-		if err != nil {
-			return nil, err
-		}
-
-		// Get the expires_at value
-		err = tx.QueryRowContext(ctx, `
-			SELECT expires_at FROM slot_reservations WHERE reservation_id = ?
-		`, reservationID).Scan(&expiresAt)
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	if err = tx.Commit(); err != nil {
