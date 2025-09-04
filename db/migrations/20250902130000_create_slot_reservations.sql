@@ -3,7 +3,7 @@
 CREATE TABLE slot_reservations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     reservation_id VARCHAR(100) UNIQUE NOT NULL,
-    nrp CHAR(255) NOT NULL,
+    nrp CHAR(9) NOT NULL,
     ukm_id CHAR(36) NOT NULL,
     expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
