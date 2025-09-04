@@ -122,7 +122,7 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 	// c.JSON(http.StatusAccepted, sessionData)
 
 	// Handle redirect after login
-	redirectURL := os.Getenv("CORS_ORIGINS")
+	redirectURL := os.Getenv("CORS_ORIGINS") + "?success=success_login"
 
 	// If user is admin, check if there was a stored redirect intention
 	if admin != nil {
