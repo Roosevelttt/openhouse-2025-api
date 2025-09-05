@@ -356,3 +356,32 @@ func (r *RegistrationRepository) ReserveSlotForPayment(ctx context.Context, nrp 
 		MaxSlot:       quota,
 	}, nil
 }
+
+// GetUserReservation gets the active reservation for a user and UKM
+func (r *RegistrationRepository) GetUserReservation(ctx context.Context, nrp, ukmID string) (*models.SlotReservation, error) {
+	var reservation models.SlotReservation
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT reservation_id, nrp, ukm_id, expires_at, created_at 
+		FROM slot_reservations 
+		WHERE nrp = ? AND ukm_id = ? AND expires_at > UTC_TIMESTAMP()
+		ORDER BY created_at DESC 
+		LIMIT 1
+	`, nrp, ukmID).Scan(
+		&reservation.ReservationID,
+		&reservation.NRP,
+		&reservation.UkmID,
+		&reservation.ExpiresAt,
+		&reservation.CreatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil // No active reservation found
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &reservation, nil
+}

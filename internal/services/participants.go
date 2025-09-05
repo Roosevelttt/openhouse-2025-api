@@ -44,3 +44,8 @@ func (s *ParticipantsService) ReserveSlot(ctx context.Context, nrp, ukmID string
 func (s *ParticipantsService) RegisterWithReservation(ctx context.Context, reservationID string, reg *models.DetailRegistration) error {
 	return s.registration.ConsumeReservation(ctx, reservationID, reg)
 }
+
+// CheckUserReservation checks if user has a valid reservation for a UKM
+func (s *ParticipantsService) CheckUserReservation(ctx context.Context, nrp, ukmID string) (*models.SlotReservation, error) {
+	return s.registration.GetUserReservation(ctx, nrp, ukmID)
+}
