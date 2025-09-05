@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -139,11 +140,16 @@ func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
 	}
 
 	if result != nil {
+		// Debug logging
+		fmt.Printf("DEBUG: Reservation created with expires_at: %v (UTC: %v)\n", result.ExpiresAt, result.ExpiresAt.UTC())
+		fmt.Printf("DEBUG: Current time: %v (UTC: %v)\n", time.Now(), time.Now().UTC())
+		fmt.Printf("DEBUG: Time until expiry: %v minutes\n", time.Until(result.ExpiresAt).Minutes())
+
 		c.JSON(http.StatusOK, gin.H{
 			"success":        true,
 			"message":        "Slot berhasil dipesan, silakan lanjutkan pembayaran dalam 5 menit",
 			"reservation_id": result.ReservationID,
-			"expires_at":     result.ExpiresAt,
+			"expires_at":     result.ExpiresAt.Format(time.RFC3339), // Explicit RFC3339 formatting
 			"current_slot":   result.CurrentSlot,
 			"max_slot":       result.MaxSlot,
 			"time_remaining": int(time.Until(result.ExpiresAt).Minutes()),
