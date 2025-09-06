@@ -161,3 +161,40 @@ func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
 		})
 	}
 }
+
+// CheckUserReservation checks if user has a valid reservation for a UKM
+func (h *ParticipantsHandler) CheckUserReservation(c *gin.Context) {
+	nrp := c.GetString("user_nrp")
+	if nrp == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	ukmID := c.Param("ukm_id")
+	if ukmID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "UKM ID is required"})
+		return
+	}
+
+	reservation, err := h.service.CheckUserReservation(c.Request.Context(), nrp, ukmID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if reservation == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"has_reservation": false,
+		})
+		return
+	}
+
+	isExpired := time.Now().After(reservation.ExpiresAt)
+
+	c.JSON(http.StatusOK, gin.H{
+		"has_reservation": true,
+		"reservation_id":  reservation.ReservationID,
+		"expires_at":      reservation.ExpiresAt.Format(time.RFC3339),
+		"is_expired":      isExpired,
+	})
+}

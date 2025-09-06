@@ -14,7 +14,7 @@ import (
 
 func New(cfg *config.Config) http.Handler {
 	gin.SetMode(cfg.GinMode)
-	
+
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())
@@ -52,6 +52,7 @@ func New(cfg *config.Config) http.Handler {
 		{
 			registrationRoutes.POST("/reserve", s.Participants.ReserveSlot)
 			registrationRoutes.POST("/access-payment/:ukm_id", s.Participants.AccessPaymentPage)
+			registrationRoutes.GET("/check-reservation/:ukm_id", s.Participants.CheckUserReservation)
 			registrationRoutes.POST("/with-reservation/:reservationId", s.Participants.RegisterWithReservation)
 		}
 
