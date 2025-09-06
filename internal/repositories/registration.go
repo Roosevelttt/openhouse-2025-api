@@ -385,3 +385,15 @@ func (r *RegistrationRepository) GetUserReservation(ctx context.Context, nrp, uk
 
 	return &reservation, nil
 }
+
+func (r *RegistrationRepository) GetRegistrationStatus(ctx context.Context, nrp, ukmID string) (bool, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM detail_registrations
+		WHERE nrp = ? AND ukm_id = ?
+	`, nrp, ukmID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

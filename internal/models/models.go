@@ -102,3 +102,10 @@ type SlotReservationResult struct {
 	CurrentSlot   int       `json:"current_slot"`
 	MaxSlot       int       `json:"max_slot"`
 }
+
+type ReservationStatus struct {
+	HasReservation bool   `json:"has_reservation"`
+	ReservationID  string `json:"reservation_id,omitempty"`
+	ExpiresAt      string `json:"expires_at,omitempty"`
+	IsExpired      bool   `json:"is_expired,omitempty"`
+}

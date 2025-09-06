@@ -49,3 +49,7 @@ func (s *ParticipantsService) RegisterWithReservation(ctx context.Context, reser
 func (s *ParticipantsService) CheckUserReservation(ctx context.Context, nrp, ukmID string) (*models.SlotReservation, error) {
 	return s.registration.GetUserReservation(ctx, nrp, ukmID)
 }
+
+func (s *ParticipantsService) CheckRegistration(ctx context.Context, nrp, ukmID string) (bool, error) {
+	return s.registration.GetRegistrationStatus(ctx, nrp, ukmID)
+}
