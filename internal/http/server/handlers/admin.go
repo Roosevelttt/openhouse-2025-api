@@ -29,7 +29,7 @@ func (h *AdminHandler) List(c *gin.Context) {
 type CreateAdminRequest struct {
 	Name       string `json:"name" binding:"required"`
 	NRP        string `json:"nrp" binding:"required"`
-	Field      string `json:"field" binding:"required,email"`
+	Field      string `json:"field" binding:"required"`
 	DivisionID string `json:"division_id"`
 	UkmID      string `json:"ukm_id"`
 }
@@ -75,7 +75,7 @@ func (h *AdminHandler) Create(c *gin.Context) {
 type UpdateAdminRequest struct {
 	Name       string `json:"name" binding:"required"`
 	NRP        string `json:"nrp" binding:"required"`
-	Field      string `json:"field" binding:"required,email"`
+	Field      string `json:"field" binding:"required"`
 	DivisionID string `json:"division_id"`
 	UkmID      string `json:"ukm_id"`
 }
