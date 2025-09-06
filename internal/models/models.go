@@ -48,6 +48,7 @@ type Admin struct {
 
 	// Tambahan sendiri di luar DB Admin
 	UkmName      *string `db:"-" json:"ukm_name,omitempty"`
+	DivisionName *string `db:"-" json:"division_name,omitempty"`
 	DivisionSlug *string `db:"-" json:"division_slug,omitempty"`
 }
 

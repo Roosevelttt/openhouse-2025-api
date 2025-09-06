@@ -93,6 +93,16 @@ func New(cfg *config.Config) http.Handler {
 			}
 		}
 
+		api.GET("/divisions", s.Division.List)
+		
+		adminManagement := api.Group("/admins")
+		adminManagement.Use(middleware.AuthMiddleware("admin"))
+		{
+			adminManagement.GET("", s.Admin.List)
+			adminManagement.POST("", s.Admin.Create)
+			adminManagement.PUT("/:id", s.Admin.Update)
+			adminManagement.DELETE("/:id", s.Admin.Delete)
+		}
 	}
 
 	return r

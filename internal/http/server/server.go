@@ -18,6 +18,8 @@ type Server struct {
 	Export       *handlers.ExportHandler
 	Groupchat    *handlers.GroupchatHandler
 	Registration *handlers.RegistrationHandler
+	Admin        *handlers.AdminHandler
+	Division     *handlers.DivisionHandler
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -31,6 +33,7 @@ func NewServer(cfg *config.Config) *Server {
 	// --- Repositories that use RAW SQL get the *sql.DB ---
 	userRepo := repositories.NewUserRepository(sqlDB)
 	adminRepo := repositories.NewAdminRepository(sqlDB)
+	divisionRepo := repositories.NewDivisionRepository(sqlDB)
 	ukmRepo := repositories.NewUkmRepository(gormDB) // Pake GORM
 	regRepo := repositories.NewRegistrationRepository(sqlDB)
 	participantsRepo := repositories.NewParticipantsRepository(sqlDB)
@@ -60,5 +63,7 @@ func NewServer(cfg *config.Config) *Server {
 		Export:       handlers.NewExportHandler(exportSvc),
 		Groupchat:    handlers.NewGroupchatHandler(groupchatSvc),
 		Registration: handlers.NewRegistrationHandler(regRepo),
+		Admin:        handlers.NewAdminHandler(adminRepo),
+		Division:     handlers.NewDivisionHandler(divisionRepo),
 	}
 }
