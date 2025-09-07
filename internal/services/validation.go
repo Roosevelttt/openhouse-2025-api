@@ -133,9 +133,9 @@ func (s *ValidationService) ProcessRejection(ctx context.Context, admin AdminCon
 
 	// Use a transaction to ensure both database updates succeed or fail together.
 	err = s.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Increment the UKM slot
-		if err := s.statusRepo.IncrementUkmSlot(tx, ukmID); err != nil {
-			return fmt.Errorf("failed to increment slot: %w", err)
+		// 1. Decrement the UKM slot
+		if err := s.statusRepo.DecrementUkmSlot(tx, ukmID); err != nil {
+			return fmt.Errorf("failed to decrement slot: %w", err)
 		}
 
 		// 2. Update the registration status to '2' (Rejected)
