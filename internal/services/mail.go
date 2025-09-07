@@ -39,6 +39,13 @@ type TemplateData struct {
 	LinkGroupChatUKM string
 }
 
+// PaymentConfirmationData holds data for payment confirmation emails
+type PaymentConfirmationData struct {
+	UserName string
+	UserNRP  string
+	UkmName  string
+}
+
 // SendNotificationEmail is our equivalent of a Mailable class.
 func (s *MailService) SendNotificationEmail(user *models.User, ukm *models.Ukm, status bool, linkChatUKM string) error {
 	// 1. Define the recipient's email address
@@ -58,6 +65,42 @@ func (s *MailService) SendNotificationEmail(user *models.User, ukm *models.Ukm, 
 		IsAccepted:       status,
 		LinkGroupChatUKM: linkChatUKM,
 	}
+
+	// 4. Execute the templates, injecting the data
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute email template: %w", err)
+	}
+
+	// 5. Compose the email message
+	m := gomail.NewMessage()
+	m.SetHeader("From", s.from)
+	m.SetHeader("To", recipient)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", body.String())
+
+	// 6. Send the email
+	// .DialAndSend() connects to the server, sends the email, and closes the connection.
+	if err := s.dialer.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return nil
+}
+
+// SendPaymentConfirmationEmailTemplate sends payment confirmation using HTML template file
+func (s *MailService) SendPaymentConfirmationEmailTemplate(userNRP string, data PaymentConfirmationData) error {
+	// 1. Define the recipient's email address
+	recipient := fmt.Sprintf("%s@john.petra.ac.id", userNRP)
+	subject := fmt.Sprintf("Konfirmasi Pendaftaran %s", data.UkmName)
+
+	// 2. Parse the HTML templates
+	tmpl, err := template.ParseFiles("internal/templates/notification_email_regist.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse email template: %w", err)
+	}
+
+	// 3. The data is already passed as parameter, no need to redefine it
 
 	// 4. Execute the templates, injecting the data
 	var body bytes.Buffer
