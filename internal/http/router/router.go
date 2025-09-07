@@ -54,6 +54,7 @@ func New(cfg *config.Config) http.Handler {
 			registrationRoutes.POST("/access-payment/:ukm_id", s.Participants.AccessPaymentPage)
 			registrationRoutes.GET("/check-reservation/:ukm_id", s.Participants.CheckUserReservation)
 			registrationRoutes.POST("/with-reservation/:reservationId", s.Participants.RegisterWithReservation)
+			registrationRoutes.GET("/check-registration/:ukm_id", s.Participants.CheckRegistration)
 		}
 
 		// Public registration routes (no auth needed)

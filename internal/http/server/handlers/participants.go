@@ -198,3 +198,17 @@ func (h *ParticipantsHandler) CheckUserReservation(c *gin.Context) {
 		"is_expired":      isExpired,
 	})
 }
+
+// CheckRegistration checks if the user is registered for a given UKM
+func (h *ParticipantsHandler) CheckRegistration(c *gin.Context) {
+    nrp := c.GetString("user_nrp")
+    ukmID := c.Param("ukm_id")
+
+    registered, err := h.service.CheckRegistration(c.Request.Context(), nrp, ukmID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"has_registered": registered})
+}
