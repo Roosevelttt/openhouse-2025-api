@@ -54,16 +54,10 @@ type UpdateUkmRequest struct {
 	Logo         *multipart.FileHeader   `form:"logo"`
 	Poster       *multipart.FileHeader   `form:"poster"`
 	Images       []*multipart.FileHeader `form:"images"`
-	RemoveImages string                  `form:"remove_images"` 
+	RemoveImages string                  `form:"remove_images"`
 }
 
 func (s *UkmService) Create(ctx context.Context, req *CreateUkmRequest) (*models.Ukm, error) {
-	if req.VideoURL != "" {
-		if err := utils.ValidateYouTubeURL(req.VideoURL); err != nil {
-			return nil, fmt.Errorf("invalid video URL: %w", err)
-		}
-	}
-
 	// Create UKM instance
 	ukm := &models.Ukm{
 		ID:          uuid.New().String(),
@@ -157,12 +151,6 @@ func (s *UkmService) Update(ctx context.Context, req *UpdateUkmRequest) (*models
 	existingUkm, err := s.ukms.FindByID(ctx, req.ID)
 	if err != nil {
 		return nil, fmt.Errorf("UKM not found: %w", err)
-	}
-
-	if req.VideoURL != "" {
-		if err := utils.ValidateYouTubeURL(req.VideoURL); err != nil {
-			return nil, fmt.Errorf("invalid video URL: %w", err)
-		}
 	}
 
 	if req.Name != "" {
