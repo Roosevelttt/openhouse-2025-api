@@ -106,11 +106,14 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmID)
 		result, err := utils.SavePaymentFile(file, header, prefix)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save payment file", "details": err.Error()})
 			return
 		}
 
 		filename = &result.FileName
+	} else if err != http.ErrMissingFile {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error processing payment file", "details": err.Error()})
+		return
 	}
 
 	// Create registration record

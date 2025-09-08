@@ -50,7 +50,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	// Handle file upload
 	file, header, err := c.Request.FormFile("payment")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Payment file is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Payment file is required", "details": err.Error()})
 		return
 	}
 	defer file.Close()
@@ -58,7 +58,7 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmID)
 	result, err := utils.SavePaymentFile(file, header, prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save payment file", "details": err.Error()})
 		return
 	}
 
@@ -87,5 +87,6 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Registration created successfully",
 		"id":      registration.ID,
+		"file":    result.RelativeURL,
 	})
 }

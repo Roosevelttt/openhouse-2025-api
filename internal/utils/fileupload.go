@@ -147,8 +147,13 @@ func ValidateYouTubeURL(url string) error {
 
 func SavePaymentFile(file multipart.File, header *multipart.FileHeader, prefix string) (*FileUploadResult, error) {
 	if err := ValidatePaymentFile(header); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("payment file validation failed: %w", err)
 	}
 
-	return SaveUploadedFile(file, header, "uploads/payments", prefix)
+	uploadDir := "uploads/payments"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create payments directory: %w", err)
+	}
+
+	return SaveUploadedFile(file, header, uploadDir, prefix)
 }
