@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
 	"openhouse-2025-api/internal/services"
+	"openhouse-2025-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -78,11 +80,16 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		return
 	}
 
-	var reg models.DetailRegistration
-	if err := c.ShouldBindJSON(&reg); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Parse multipart form data
+	err := c.Request.ParseMultipartForm(10 << 20) // 10MB max
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
 		return
 	}
+
+	// Get form values
+	ukmID := c.PostForm("ukm_id")
+	driveURL := c.PostForm("drive_url")
 
 	nrp := c.GetString("user_nrp")
 	if nrp == "" {
@@ -90,10 +97,63 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		return
 	}
 
-	reg.NRP = nrp
+	// Validate required fields
+	if ukmID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "UKM ID is required"})
+		return
+	}
 
-	err := h.service.RegisterWithReservation(c.Request.Context(), reservationID, &reg)
+	var filename *string = nil
+
+	// Handle file upload (optional for free UKMs)
+	file, header, err := c.Request.FormFile("payment")
+	if err == nil {
+		// File was uploaded, validate and save it
+		defer file.Close()
+
+		// Validate file type
+		allowedTypes := []string{".jpg", ".jpeg", ".png", ".pdf"}
+		ext := strings.ToLower(strings.TrimSpace(strings.TrimSuffix(header.Filename, " ")))
+		ext = ext[strings.LastIndex(ext, "."):]
+
+		isValidType := false
+		for _, allowedType := range allowedTypes {
+			if ext == allowedType {
+				isValidType = true
+				break
+			}
+		}
+		if !isValidType {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Only JPG, PNG, and PDF files are allowed"})
+			return
+		}
+
+		// Get UKM name for the filename prefix
+		// Assuming we can get UKM name from the service or we'll use UKM ID
+		ukmName := ukmID // Fallback to UKM ID if name not available
+
+		// Use SaveUploadedFile with proper naming format: nrp_ukmname_payment
+		prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmName)
+		result, err := utils.SaveUploadedFile(file, header, "uploads/payments", prefix)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
+			return
+		}
+
+		filename = &result.FileName
+	}
+
+	// Create registration record
+	reg := &models.DetailRegistration{
+		NRP:      nrp,
+		UkmID:    ukmID,
+		Payment:  filename, // Will be nil for free UKMs or if no file uploaded
+		DriveURL: driveURL,
+	}
+
+	err = h.service.RegisterWithReservation(c.Request.Context(), reservationID, reg)
 	if err != nil {
+
 		if err.Error() == "reservation not found" || err.Error() == "reservation has expired" {
 			c.JSON(http.StatusGone, gin.H{"error": err.Error()})
 			return
