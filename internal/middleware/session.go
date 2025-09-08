@@ -8,8 +8,8 @@ import (
 
     "github.com/markbates/goth/gothic"
     "github.com/gin-contrib/sessions"
-    // "github.com/gin-contrib/sessions/cookie"
-    "github.com/gin-contrib/sessions/redis"
+    "github.com/gin-contrib/sessions/cookie"
+    // "github.com/gin-contrib/sessions/redis"
     "github.com/gin-gonic/gin"
 )
 
@@ -23,20 +23,20 @@ func SessionManager(cfg *config.Config) gin.HandlerFunc {
 		log.Fatal("SESSION_HASH_KEY environment variable is not set.")
 	}
 
-    redisUsername := os.Getenv("REDIS_USERNAME")
-    redisAddr := os.Getenv("REDIS_ADDR")
-    redisPassword := os.Getenv("REDIS_PASSWORD")
-    if redisUsername == "" || redisAddr == "" {
-        log.Fatal("Please complete REDIS credentials.")
-    }
+    // redisUsername := os.Getenv("REDIS_USERNAME")
+    // redisAddr := os.Getenv("REDIS_ADDR")
+    // redisPassword := os.Getenv("REDIS_PASSWORD")
+    // if redisUsername == "" || redisAddr == "" {
+    //     log.Fatal("Please complete REDIS credentials.")
+    // }
 
 
     
-    // store := cookie.NewStore([]byte(hashKey))
-    store, err := redis.NewStore(10, "tcp", redisAddr, redisUsername, redisPassword, []byte(hashKey))
-    if err != nil {
-        log.Fatalf("Could not connect to Redis: %v", err)
-    }
+    store := cookie.NewStore([]byte(hashKey))
+    // store, err := redis.NewStore(10, "tcp", redisAddr, redisUsername, redisPassword, []byte(hashKey))
+    // if err != nil {
+    //     log.Fatalf("Could not connect to Redis: %v", err)
+    // }
     store.Options(sessions.Options{
         MaxAge: 60 * 60 * 24 * 7, // 7 days in seconds
         // KELLY LIHAT INI LAGI
