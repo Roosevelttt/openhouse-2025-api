@@ -25,6 +25,7 @@ type Config struct {
 	SMTPUser           string
 	SMTPPass           string
 	SMTPFrom           string // e.g., "OpenHouse 2025 <no-reply@yourdomain.com>"
+	CSRFAuthKey 	string 
 }
 
 func getenv(key, def string) string {
@@ -56,6 +57,7 @@ func Load() *Config {
 		SMTPUser:           getenv("SMTP_USER", ""),
 		SMTPPass:           getenv("SMTP_PASS", ""),
 		SMTPFrom:           getenv("SMTP_FROM", ""),
+		CSRFAuthKey:	 	getenv("CSRF_AUTH_KEY", ""),
 	}
 	log.Printf("config loaded: ENV=%s GIN_MODE=%s HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.Env, cfg.GinMode, cfg.HTTPPort, cfg.DBHost, cfg.DBName)
 	return cfg
