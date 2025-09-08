@@ -24,12 +24,6 @@ func (h *UkmHandler) List(c *gin.Context) {
 
 // Create creates a new UKM with file uploads
 func (h *UkmHandler) Create(c *gin.Context) {
-	// Parse multipart form
-	err := c.Request.ParseMultipartForm(32 << 20) // 32MB max
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
-		return
-	}
 
 	// Parse basic fields
 	req := &services.CreateUkmRequest{
@@ -120,13 +114,6 @@ func (h *UkmHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
-		return
-	}
-
-	// Parse multipart form
-	err := c.Request.ParseMultipartForm(32 << 20) // 32MB max
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
 		return
 	}
 
