@@ -20,6 +20,8 @@ type FileUploadResult struct {
 
 var AllowedImageTypes = []string{".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
+var AllowedPaymentTypes = []string{".jpg", ".jpeg", ".png", ".pdf"}
+
 func ValidateImageFile(header *multipart.FileHeader) error {
 	ext := strings.ToLower(filepath.Ext(header.Filename))
 
@@ -30,6 +32,18 @@ func ValidateImageFile(header *multipart.FileHeader) error {
 	}
 
 	return fmt.Errorf("invalid file type %s. Allowed types: %s", ext, strings.Join(AllowedImageTypes, ", "))
+}
+
+func ValidatePaymentFile(header *multipart.FileHeader) error {
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+
+	for _, allowedType := range AllowedPaymentTypes {
+		if ext == allowedType {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid file type %s. Allowed types: %s", ext, strings.Join(AllowedPaymentTypes, ", "))
 }
 
 // SaveUploadedFile saves an uploaded file to the specified directory
@@ -103,7 +117,7 @@ func DeleteFile(filePath string) error {
 
 	// Check if file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil 
+		return nil
 	}
 
 	return os.Remove(filePath)
@@ -111,7 +125,7 @@ func DeleteFile(filePath string) error {
 
 func ValidateYouTubeURL(url string) error {
 	if url == "" {
-		return nil 
+		return nil
 	}
 
 	url = strings.ToLower(url)
@@ -129,4 +143,12 @@ func ValidateYouTubeURL(url string) error {
 	}
 
 	return fmt.Errorf("invalid YouTube URL. Must start with: %s", strings.Join(validPrefixes, ", "))
+}
+
+func SavePaymentFile(file multipart.File, header *multipart.FileHeader, prefix string) (*FileUploadResult, error) {
+	if err := ValidatePaymentFile(header); err != nil {
+		return nil, err
+	}
+
+	return SaveUploadedFile(file, header, "uploads/payments", prefix)
 }

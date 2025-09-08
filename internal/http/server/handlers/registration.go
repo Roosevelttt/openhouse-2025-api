@@ -2,14 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
+	"openhouse-2025-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,42 +55,10 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Validate file type
-	allowedTypes := []string{".jpg", ".jpeg", ".png", ".pdf"}
-	ext := strings.ToLower(filepath.Ext(header.Filename))
-	isValidType := false
-	for _, allowedType := range allowedTypes {
-		if ext == allowedType {
-			isValidType = true
-			break
-		}
-	}
-	if !isValidType {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Only JPG, PNG, and PDF files are allowed"})
-		return
-	}
-
-	// Create uploads directory if it doesn't exist
-	uploadsDir := "uploads/payments"
-	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory"})
-		return
-	}
-
-	// Generate unique filename
-	filename := fmt.Sprintf("%s_%s_%s", nrp, ukmID, ext)
-	filePath := filepath.Join(uploadsDir, filename)
-
-	// Save file
-	dst, err := os.Create(filePath)
+	prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmID)
+	result, err := utils.SavePaymentFile(file, header, prefix)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
-		return
-	}
-	defer dst.Close()
-
-	if _, err := io.Copy(dst, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -101,17 +66,15 @@ func (h *RegistrationHandler) Create(c *gin.Context) {
 	registration := &models.DetailRegistration{
 		NRP:      nrp,
 		UkmID:    ukmID,
-		Payment:  &filename, // Store filename as pointer to string
+		Payment:  &result.FileName, // Store filename as pointer to string
 		DriveURL: driveURL,
 	}
 
 	// Debug: Print the data being inserted
 	fmt.Printf("Creating registration: NRP=%s, UkmID=%s, Payment=%s, DriveURL=%s\n",
-		nrp, ukmID, filename, driveURL)
+		nrp, ukmID, result.FileName, driveURL)
 
 	if err := h.registrationRepo.Create(c.Request.Context(), registration); err != nil {
-		// Clean up uploaded file if database insert fails
-		os.Remove(filePath)
 		// Log the actual error for debugging
 		fmt.Printf("Database error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{

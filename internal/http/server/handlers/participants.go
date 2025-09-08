@@ -100,17 +100,13 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 	// Handle file upload (optional for free UKMs)
 	file, header, err := c.Request.FormFile("payment")
 	if err == nil {
-		// File was uploaded, save it using SaveUploadedFile
+		// File was uploaded, save it using SavePaymentFile
 		defer file.Close()
 
-		// Get UKM name for the filename prefix
-		ukmName := ukmID // Fallback to UKM ID if name not available
-
-		// Use SaveUploadedFile with proper naming format: nrp_ukmname_payment
-		prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmName)
-		result, err := utils.SaveUploadedFile(file, header, "uploads/payments", prefix)
+		prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmID)
+		result, err := utils.SavePaymentFile(file, header, prefix)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -235,14 +231,14 @@ func (h *ParticipantsHandler) CheckUserReservation(c *gin.Context) {
 
 // CheckRegistration checks if the user is registered for a given UKM
 func (h *ParticipantsHandler) CheckRegistration(c *gin.Context) {
-    nrp := c.GetString("user_nrp")
-    ukmID := c.Param("ukm_id")
+	nrp := c.GetString("user_nrp")
+	ukmID := c.Param("ukm_id")
 
-    registered, err := h.service.CheckRegistration(c.Request.Context(), nrp, ukmID)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	registered, err := h.service.CheckRegistration(c.Request.Context(), nrp, ukmID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"has_registered": registered})
+	c.JSON(http.StatusOK, gin.H{"has_registered": registered})
 }
