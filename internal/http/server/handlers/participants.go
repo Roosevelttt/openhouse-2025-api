@@ -153,10 +153,6 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 
 	err = h.service.RegisterWithReservation(c.Request.Context(), reservationID, reg)
 	if err != nil {
-		// Clean up uploaded file if database insert fails
-		if filename != nil {
-			// Note: We'd need the full file path to clean up, but for now we'll rely on the service to handle cleanup
-		}
 
 		if err.Error() == "reservation not found" || err.Error() == "reservation has expired" {
 			c.JSON(http.StatusGone, gin.H{"error": err.Error()})
