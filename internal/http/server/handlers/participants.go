@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
 	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
@@ -115,7 +115,7 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		allowedTypes := []string{".jpg", ".jpeg", ".png", ".pdf"}
 		ext := strings.ToLower(strings.TrimSpace(strings.TrimSuffix(header.Filename, " ")))
 		ext = ext[strings.LastIndex(ext, "."):]
-		
+
 		isValidType := false
 		for _, allowedType := range allowedTypes {
 			if ext == allowedType {
@@ -128,10 +128,10 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 			return
 		}
 
-		// Get UKM name for the filename prefix  
+		// Get UKM name for the filename prefix
 		// Assuming we can get UKM name from the service or we'll use UKM ID
 		ukmName := ukmID // Fallback to UKM ID if name not available
-		
+
 		// Use SaveUploadedFile with proper naming format: nrp_ukmname_payment
 		prefix := fmt.Sprintf("%s_%s_payment", nrp, ukmName)
 		result, err := utils.SaveUploadedFile(file, header, "uploads/payments", prefix)
@@ -139,7 +139,7 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
 			return
 		}
-		
+
 		filename = &result.FileName
 	}
 
@@ -157,7 +157,7 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		if filename != nil {
 			// Note: We'd need the full file path to clean up, but for now we'll rely on the service to handle cleanup
 		}
-		
+
 		if err.Error() == "reservation not found" || err.Error() == "reservation has expired" {
 			c.JSON(http.StatusGone, gin.H{"error": err.Error()})
 			return
