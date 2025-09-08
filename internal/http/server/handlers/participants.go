@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"openhouse-2025-api/internal/models"
@@ -80,13 +79,6 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 		return
 	}
 
-	// Parse multipart form data
-	err := c.Request.ParseMultipartForm(10 << 20) // 10MB max
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
-		return
-	}
-
 	// Get form values
 	ukmID := c.PostForm("ukm_id")
 	driveURL := c.PostForm("drive_url")
@@ -108,28 +100,10 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 	// Handle file upload (optional for free UKMs)
 	file, header, err := c.Request.FormFile("payment")
 	if err == nil {
-		// File was uploaded, validate and save it
+		// File was uploaded, save it using SaveUploadedFile
 		defer file.Close()
 
-		// Validate file type
-		allowedTypes := []string{".jpg", ".jpeg", ".png", ".pdf"}
-		ext := strings.ToLower(strings.TrimSpace(strings.TrimSuffix(header.Filename, " ")))
-		ext = ext[strings.LastIndex(ext, "."):]
-
-		isValidType := false
-		for _, allowedType := range allowedTypes {
-			if ext == allowedType {
-				isValidType = true
-				break
-			}
-		}
-		if !isValidType {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Only JPG, PNG, and PDF files are allowed"})
-			return
-		}
-
 		// Get UKM name for the filename prefix
-		// Assuming we can get UKM name from the service or we'll use UKM ID
 		ukmName := ukmID // Fallback to UKM ID if name not available
 
 		// Use SaveUploadedFile with proper naming format: nrp_ukmname_payment
