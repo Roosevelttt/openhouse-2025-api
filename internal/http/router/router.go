@@ -45,15 +45,18 @@ func New(cfg *config.Config) http.Handler {
 			// Send a success response with a simple JSON body.
 			c.JSON(http.StatusOK, gin.H{
 				"message": "CSRF token provided",
+				"csrfToken": token, // fallback
 			})
 		})
+		
+		public.POST("/user/session/values", s.Session.GetValues)
+		public.GET("/debug/session", s.Session.DebugSession)
 	}
 
 	api := r.Group("/api")
 	api.Use(middleware.CSRF(cfg))
 	{
 
-		api.GET("/debug/session", s.Session.DebugSession)
 		api.POST("/auth/logout", s.Auth.Logout)
 
 		api.GET("/ukms", s.Ukm.List)
@@ -64,7 +67,6 @@ func New(cfg *config.Config) http.Handler {
 		userRoutes := api.Group("/user")
 		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
-			userRoutes.POST("/session/values", s.Session.GetValues)
 			userRoutes.GET("/biodata", s.User.GetBiodata)
 			userRoutes.POST("/biodata", s.User.UpdateBiodata)
 		}
