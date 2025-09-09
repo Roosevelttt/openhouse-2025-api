@@ -39,8 +39,7 @@ func CSRF(cfg *config.Config) gin.HandlerFunc {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte(`{"message": "Forbidden - CSRF token is invalid or missing"}`))
 			tokenFromCookie := csrf.Token(r)
-			log.Printf("Expected Token yyy: %s", csrf.Token(r))
-            log.Printf("Expected Token zzz: %s", tokenFromCookie)
+			log.Printf("Expected Token from cookie: %s", tokenFromCookie)
 			log.Printf("Received Token (from header): %s", r.Header.Get("X-CSRF-Token"))
 		})),
 	)
