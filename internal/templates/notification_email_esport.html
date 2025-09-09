@@ -88,12 +88,16 @@
 <div class="wrapper">
     <div class="container">
         <div class="header">
-            Konfirmasi Pendaftaran UKM {{ .UkmName }}
+            Status Pendaftaran UKM
         </div>
         <div class="content">
+            {{if .IsAccepted}}
             <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>!</h4>
-            <h4 class="mt-20 mb-5">Selamat! Kamu telah berhasil mendaftar pada <span class="highlight">{{ .UkmName }}</span>.</h4>
-            <h4 class="mt-20 mb-5">Info lebih lanjut akan kami update pada email.</h4>
+            <h4 class="mt-20 mb-5">Grup Petra Esport digunakan untuk melakukan proses seleksi. Untuk hasil akhir penerimaan akan langsung diumumkan oleh pihak Petra Esport.</h4>
+            {{else}}
+            <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>,</h4>
+            <h4 class="mt-20 mb-5">Mohon maaf, pendaftaran kamu untuk <span class="highlight">{{ .UkmName }}</span> tidak berhasil.</h4>
+            {{end}}
         </div>
         <div class="footer">
             Jika ada pertanyaan lebih lanjut, silakan hubungi OA Line Openhouse

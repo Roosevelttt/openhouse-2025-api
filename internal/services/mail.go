@@ -53,9 +53,18 @@ func (s *MailService) SendNotificationEmail(user *models.User, ukm *models.Ukm, 
 	subject := fmt.Sprintf("Update mengenai pendaftaran untuk %s", ukm.Name)
 
 	// 2. Parse the HTML templates
-	tmpl, err := template.ParseFiles("internal/templates/notification_email.html")
-	if err != nil {
-		return fmt.Errorf("failed to parse email template: %w", err)
+	var tmpl *template.Template
+	var err error
+	if ukm.Slug == "esports" {
+		tmpl, err = template.ParseFiles("internal/templates/notification_email_esport.html")
+		if err != nil {
+			return fmt.Errorf("failed to parse email template: %w", err)
+		}
+	} else {
+		tmpl, err = template.ParseFiles("internal/templates/notification_email.html")
+		if err != nil {
+			return fmt.Errorf("failed to parse email template: %w", err)
+		}
 	}
 
 	// 3. Prepare the data to inject into the templates

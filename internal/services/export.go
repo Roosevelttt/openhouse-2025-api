@@ -38,7 +38,7 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context, adminDivi
 	// 3. Define and write the header row
 	headers := []string{
 		"NRP", "Name", "Line ID", "Phone", "UKM",
-		"File Status", "Payment Validated", "Registered At", "Invited",
+		"Payment Validated", "Registered At",
 	}
 	for i, header := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
@@ -72,9 +72,9 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context, adminDivi
 		f.SetCellValue(sheetName, fmt.Sprintf("D%d", rowNum), p.Phone)
 		f.SetCellValue(sheetName, fmt.Sprintf("E%d", rowNum), p.UkmName)
 		//f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), paymentStr) // Assuming Payment is a *string
-		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), mapFileStatus(p.FileValidated))
-		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), mapPaymentStatus(p.PaymentValidated))
-		f.SetCellValue(sheetName, fmt.Sprintf("H%d", rowNum), createdAtStr)
+		//f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), mapFileStatus(p.FileValidated))
+		f.SetCellValue(sheetName, fmt.Sprintf("F%d", rowNum), mapPaymentStatus(p.PaymentValidated))
+		f.SetCellValue(sheetName, fmt.Sprintf("G%d", rowNum), createdAtStr)
 	}
 
 	// Set active sheet of the workbook.
