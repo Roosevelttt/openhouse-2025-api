@@ -49,22 +49,26 @@ func New(cfg *config.Config) http.Handler {
 			})
 		})
 		
-		public.POST("/user/session/values", s.Session.GetValues)
+		public.GET("/ukms", s.Ukm.List)
+		public.GET("/ukms/:id", s.Ukm.GetByID)
+		public.GET("/ukms/slug/:slug", s.Ukm.GetBySlug)
+		public.GET("/divisions", s.Division.List)
+		public.GET("/admins", s.Admin.List)
+		
 		public.GET("/debug/session", s.Session.DebugSession)
 	}
 
-	api := r.Group("/api")
-	api.Use(middleware.CSRF(cfg))
+	protected := r.Group("/api")
+	protected.Use(middleware.CSRF(cfg))
 	{
+		protected.POST("/auth/logout", s.Auth.Logout)
 
-		api.POST("/auth/logout", s.Auth.Logout)
+		userRoutes := protected.Group("/user")
+		{
+			userRoutes.POST("/session/values", s.Session.GetValues)
+		}
 
-		api.GET("/ukms", s.Ukm.List)
-		api.GET("/ukms/:id", s.Ukm.GetByID)
-		api.GET("/ukms/slug/:slug", s.Ukm.GetBySlug)
-
-		// User routes
-		userRoutes := api.Group("/user")
+		userRoutes = protected.Group("/user")
 		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			userRoutes.GET("/biodata", s.User.GetBiodata)
@@ -72,7 +76,7 @@ func New(cfg *config.Config) http.Handler {
 		}
 
 		// Registration routes
-		registrationRoutes := api.Group("/registrations")
+		registrationRoutes := protected.Group("/registrations")
 		registrationRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			registrationRoutes.POST("/reserve", s.Participants.ReserveSlot)
@@ -83,7 +87,7 @@ func New(cfg *config.Config) http.Handler {
 		}
 
 		// Admin routes
-		adminRoutes := api.Group("/admin")
+		adminRoutes := protected.Group("/admin")
 		adminRoutes.Use(middleware.AuthMiddleware("admin"))
 		{
 			adminRoutes.GET("/participants", s.Participants.List)
@@ -114,12 +118,9 @@ func New(cfg *config.Config) http.Handler {
 			}
 		}
 
-		api.GET("/divisions", s.Division.List)
-		
-		adminManagement := api.Group("/admins")
+		adminManagement := protected.Group("/admins")
 		adminManagement.Use(middleware.AuthMiddleware("admin"))
 		{
-			adminManagement.GET("", s.Admin.List)
 			adminManagement.POST("", s.Admin.Create)
 			adminManagement.PUT("/:id", s.Admin.Update)
 			adminManagement.DELETE("/:id", s.Admin.Delete)
