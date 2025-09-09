@@ -2,7 +2,7 @@ package router
 
 import (
 	"net/http"
-	// "log"
+	"log"
 	// "os"
 
 	"openhouse-2025-api/internal/config"
@@ -10,6 +10,7 @@ import (
 	"openhouse-2025-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 )
 
 func New(cfg *config.Config) http.Handler {
@@ -20,6 +21,7 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
 	r.Use(middleware.SessionManager(cfg))
+	r.Use(middleware.CSRF(cfg)) 
 
 	s := server.NewServer(cfg)
 
@@ -28,6 +30,22 @@ func New(cfg *config.Config) http.Handler {
 
 	api := r.Group("/api")
 	{
+
+		api.GET("/csrf-tok", func(c *gin.Context) {
+			// Retrieve the token associated with the user's session.
+			// This function is provided by the gorilla/csrf library.
+			token := csrf.Token(c.Request)
+			log.Printf("CSRF Token generated: %s", token)
+			
+			// Set the token in a custom response header. Your frontend will read this.
+			c.Header("X-CSRF-Token", token)
+			
+			// Send a success response with a simple JSON body.
+			c.JSON(http.StatusOK, gin.H{
+				"message": "CSRF token provided",
+			})
+		})
+
 		api.GET("/debug/session", s.Session.DebugSession)
 		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
 		api.GET("/auth/google/callback", s.Auth.OAuthCallback)

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+    "net/http"
 	"log"
 	"os"
 
@@ -41,8 +42,9 @@ func SessionManager(cfg *config.Config) gin.HandlerFunc {
         MaxAge: 60 * 60 * 24 * 7, // 7 days in seconds
         // KELLY LIHAT INI LAGI
         Path:     "/",
+        // HttpOnly: true,
         HttpOnly: true,  
-        SameSite: 0, 
+        SameSite: http.SameSiteLaxMode, 
 		Secure:   !isDevelopment,
     })
     gothic.Store = store

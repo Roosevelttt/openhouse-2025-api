@@ -16,9 +16,10 @@ func CORS(cfg *config.Config) gin.HandlerFunc {
 			if o == "*" || o == origin { allow = origin; break }
 		}
 		c.Header("Access-Control-Allow-Origin", allow)
-		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type, X-CSRF-Token")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Expose-Headers", "X-CSRF-Token")
 		if c.Request.Method == "OPTIONS" { c.AbortWithStatus(204); return }
 		c.Next()
 	}
