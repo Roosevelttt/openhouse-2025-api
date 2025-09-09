@@ -21,14 +21,20 @@ func New(cfg *config.Config) http.Handler {
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg))
 	r.Use(middleware.SessionManager(cfg))
-	r.Use(middleware.CSRF(cfg)) 
 
 	s := server.NewServer(cfg)
 
 	// Serve static files for uploads
 	r.Static("/uploads", "./uploads")
 
+	public := r.Group("/api")
+	{
+		public.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
+		public.GET("/auth/google/callback", s.Auth.OAuthCallback)
+	}
+
 	api := r.Group("/api")
+	api.Use(middleware.CSRF(cfg))
 	{
 
 		api.GET("/csrf-tok", func(c *gin.Context) {
@@ -47,8 +53,6 @@ func New(cfg *config.Config) http.Handler {
 		})
 
 		api.GET("/debug/session", s.Session.DebugSession)
-		api.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
-		api.GET("/auth/google/callback", s.Auth.OAuthCallback)
 		api.POST("/auth/logout", s.Auth.Logout)
 
 		api.GET("/ukms", s.Ukm.List)
@@ -73,12 +77,6 @@ func New(cfg *config.Config) http.Handler {
 			registrationRoutes.GET("/check-reservation/:ukm_id", s.Participants.CheckUserReservation)
 			registrationRoutes.POST("/with-reservation/:reservationId", s.Participants.RegisterWithReservation)
 			registrationRoutes.GET("/check-registration/:ukm_id", s.Participants.CheckRegistration)
-		}
-
-		// Public registration routes (no auth needed)
-		{
-			api.GET("/registrations/test", s.Registration.Test)
-			api.POST("/registrations", s.Registration.Create)
 		}
 
 		// Admin routes
