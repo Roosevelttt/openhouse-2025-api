@@ -31,13 +31,9 @@ func New(cfg *config.Config) http.Handler {
 	{
 		public.GET("/auth/google/start", s.Auth.BeginGoogleAuth)
 		public.GET("/auth/google/callback", s.Auth.OAuthCallback)
-	}
-
-	api := r.Group("/api")
-	api.Use(middleware.CSRF(cfg))
-	{
-
-		api.GET("/csrf-tok", func(c *gin.Context) {
+		
+		
+		public.GET("/csrf-tok", func(c *gin.Context) {
 			// Retrieve the token associated with the user's session.
 			// This function is provided by the gorilla/csrf library.
 			token := csrf.Token(c.Request)
@@ -51,6 +47,11 @@ func New(cfg *config.Config) http.Handler {
 				"message": "CSRF token provided",
 			})
 		})
+	}
+
+	api := r.Group("/api")
+	api.Use(middleware.CSRF(cfg))
+	{
 
 		api.GET("/debug/session", s.Session.DebugSession)
 		api.POST("/auth/logout", s.Auth.Logout)
