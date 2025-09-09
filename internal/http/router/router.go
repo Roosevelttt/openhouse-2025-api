@@ -49,6 +49,8 @@ func New(cfg *config.Config) http.Handler {
 			})
 		})
 		
+		public.POST("/user/session/values", s.Session.GetValues)
+		
 		public.GET("/ukms", s.Ukm.List)
 		public.GET("/ukms/:id", s.Ukm.GetByID)
 		public.GET("/ukms/slug/:slug", s.Ukm.GetBySlug)
@@ -64,11 +66,6 @@ func New(cfg *config.Config) http.Handler {
 		protected.POST("/auth/logout", s.Auth.Logout)
 
 		userRoutes := protected.Group("/user")
-		{
-			userRoutes.POST("/session/values", s.Session.GetValues)
-		}
-
-		userRoutes = protected.Group("/user")
 		userRoutes.Use(middleware.AuthMiddleware("user", "admin"))
 		{
 			userRoutes.GET("/biodata", s.User.GetBiodata)
