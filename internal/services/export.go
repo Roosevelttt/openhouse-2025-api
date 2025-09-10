@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
 	"time"
 
@@ -16,6 +17,10 @@ type ExportService struct {
 
 func NewExportService(participantsRepo *repositories.ParticipantsRepository) *ExportService {
 	return &ExportService{participantsRepo: participantsRepo}
+}
+
+func (s *ExportService) ListParticipantsForExport(ctx context.Context, adminDivisionSlug string, adminUkmID string) ([]models.Participant, error) {
+	return s.participantsRepo.List(ctx, adminDivisionSlug, adminUkmID)
 }
 
 // GenerateParticipantsExcel creates an Excel file in memory and returns it as a byte buffer.
@@ -89,20 +94,6 @@ func (s *ExportService) GenerateParticipantsExcel(ctx context.Context, adminDivi
 	}
 
 	return buffer, nil
-}
-
-// Helper functions to map integer statuses to readable strings
-func mapFileStatus(status int) string {
-	switch status {
-	case 0:
-		return "Pending"
-	case 1:
-		return "Accepted"
-	case 2:
-		return "Rejected"
-	default:
-		return "Unknown"
-	}
 }
 
 func mapPaymentStatus(status int) string {

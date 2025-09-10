@@ -35,14 +35,14 @@ func New(cfg *config.Config) http.Handler {
 			// This function is provided by the gorilla/csrf library.
 			token := csrf.Token(c.Request)
 			log.Printf("CSRF Token generated: %s", token)
-			
+
 			if token == "" {
 				log.Printf("Request details: URL=%s, Method=%s", c.Request.URL.Path, c.Request.Method)
 			}
-			
+
 			// Set the token in a custom response header. Your frontend will read this.
 			c.Header("X-CSRF-Token", token)
-			
+
 			// Send a success response with a simple JSON body.
 			c.JSON(http.StatusOK, gin.H{
 				"message": "CSRF token provided",
@@ -108,11 +108,14 @@ func New(cfg *config.Config) http.Handler {
 			export := adminRoutes.Group("/export")
 			{
 				export.GET("/participants", s.Export.ExportParticipants)
+				export.POST("/participants/daily-recap", s.Export.TriggerDailyRecap)
+				export.GET("/participants/google-sheets/start", s.Export.GoogleSheetsOAuthStart)
+				export.GET("/participants/google-sheets/callback", s.Export.GoogleSheetsOAuthCallback)
 			}
 		}
 
 		api.GET("/divisions", s.Division.List)
-		
+
 		adminManagement := api.Group("/admins")
 		adminManagement.Use(middleware.AuthMiddleware("admin"))
 		{
