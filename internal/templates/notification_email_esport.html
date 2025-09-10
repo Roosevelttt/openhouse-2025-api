@@ -94,6 +94,11 @@
             {{if .IsAccepted}}
             <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>!</h4>
             <h4 class="mt-20 mb-5">Grup Petra Esport digunakan untuk melakukan proses seleksi. Untuk hasil akhir penerimaan akan langsung diumumkan oleh pihak Petra Esport.</h4>
+            <h4 class="mt-20 mb-5">Silakan bergabung dengan grup UKM melalui link di bawah ini.</h4>
+            <div class="link-group">
+                <strong>Link Grup {{ .UkmName }}:</strong><br>
+                <a href="{{ .LinkGroupChatUKM }}">{{ .LinkGroupChatUKM }}</a>
+            </div>
             {{else}}
             <h4 class="mt-10">Hai <span class="highlight">{{ .UserName }}</span>,</h4>
             <h4 class="mt-20 mb-5">Mohon maaf, pendaftaran kamu untuk <span class="highlight">{{ .UkmName }}</span> tidak berhasil.</h4>
