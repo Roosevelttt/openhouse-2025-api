@@ -62,15 +62,14 @@ func runDailyRecapScheduler(cfg *config.Config) {
 		log.Println("Initial daily recap completed successfully")
 	}
 
-	// Schedule daily recap to run every day at 11:59 PM (WIB)
+	// Schedule daily recap to run every day at the configured time (default: 11:59 PM WIB)
 	for {
 		now := time.Now()
 		// Set timezone to Asia/Jakarta (WIB)
 		wib, _ := time.LoadLocation("Asia/Jakarta")
 		nowWIB := now.In(wib)
 
-		// Calculate next run time (11:59 PM today or tomorrow)
-		nextRun := time.Date(nowWIB.Year(), nowWIB.Month(), nowWIB.Day(), 23, 59, 0, 0, wib)
+		nextRun := time.Date(nowWIB.Year(), nowWIB.Month(), nowWIB.Day(), cfg.GoogleSheetsDailyRecapHour, cfg.GoogleSheetsDailyRecapMinute, 0, 0, wib)
 		if nowWIB.After(nextRun) {
 			// If it's already past 11:59 PM today, schedule for tomorrow
 			nextRun = nextRun.Add(24 * time.Hour)

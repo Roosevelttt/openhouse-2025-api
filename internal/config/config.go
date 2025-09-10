@@ -8,27 +8,29 @@ import (
 )
 
 type Config struct {
-	Env                       string
-	GinMode                   string
-	HTTPPort                  string
-	DBHost                    string
-	DBPort                    string
-	DBUser                    string
-	DBPass                    string
-	DBName                    string
-	GoogleClientID            string
-	GoogleClientSecret        string
-	GoogleRedirectURL         string
-	GoogleSheetsRedirectURL   string
-	GoogleSheetsSpreadsheetID string
-	GoogleSheetsTokenFilePath string
-	CORSOrigins               string
-	SMTPHost                  string
-	SMTPPort                  string
-	SMTPUser                  string
-	SMTPPass                  string
-	SMTPFrom                  string // e.g., "OpenHouse 2025 <no-reply@yourdomain.com>"
-	CSRFAuthKey               string
+	Env                          string
+	GinMode                      string
+	HTTPPort                     string
+	DBHost                       string
+	DBPort                       string
+	DBUser                       string
+	DBPass                       string
+	DBName                       string
+	GoogleClientID               string
+	GoogleClientSecret           string
+	GoogleRedirectURL            string
+	GoogleSheetsRedirectURL      string
+	GoogleSheetsSpreadsheetID    string
+	GoogleSheetsTokenFilePath    string
+	GoogleSheetsDailyRecapHour   string
+	GoogleSheetsDailyRecapMinute string
+	CORSOrigins                  string
+	SMTPHost                     string
+	SMTPPort                     string
+	SMTPUser                     string
+	SMTPPass                     string
+	SMTPFrom                     string // e.g., "OpenHouse 2025 <no-reply@yourdomain.com>"
+	CSRFAuthKey                  string
 }
 
 func getenv(key, def string) string {
@@ -43,27 +45,29 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	cfg := &Config{
-		Env:                       getenv("ENV", "development"),
-		GinMode:                   getenv("GIN_MODE", "debug"),
-		HTTPPort:                  getenv("HTTP_PORT", "8080"),
-		DBHost:                    getenv("DB_HOST", "127.0.0.1"),
-		DBPort:                    getenv("DB_PORT", "3306"),
-		DBUser:                    getenv("DB_USERNAME", "root"),
-		DBPass:                    getenv("DB_PASSWORD", ""),
-		DBName:                    getenv("DB_DATABASE", "openhouse-2025"),
-		GoogleClientID:            getenv("GOOGLE_CLIENT_ID", ""),
-		GoogleClientSecret:        getenv("GOOGLE_CLIENT_SECRET", ""),
-		GoogleRedirectURL:         getenv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/auth/google/callback"),
-		GoogleSheetsRedirectURL:   getenv("GOOGLE_SHEETS_REDIRECT_URL", ""),
-		GoogleSheetsSpreadsheetID: getenv("GOOGLE_SHEETS_SPREADSHEET_ID", ""),
-		GoogleSheetsTokenFilePath: getenv("GOOGLE_SHEETS_TOKEN_FILE_PATH", "token.json"),
-		CORSOrigins:               getenv("CORS_ORIGINS", "*"),
-		SMTPHost:                  getenv("SMTP_HOST", ""),
-		SMTPPort:                  getenv("SMTP_PORT", "587"),
-		SMTPUser:                  getenv("SMTP_USER", ""),
-		SMTPPass:                  getenv("SMTP_PASS", ""),
-		SMTPFrom:                  getenv("SMTP_FROM", ""),
-		CSRFAuthKey:               getenv("CSRF_AUTH_KEY", ""),
+		Env:                          getenv("ENV", "development"),
+		GinMode:                      getenv("GIN_MODE", "debug"),
+		HTTPPort:                     getenv("HTTP_PORT", "8080"),
+		DBHost:                       getenv("DB_HOST", "127.0.0.1"),
+		DBPort:                       getenv("DB_PORT", "3306"),
+		DBUser:                       getenv("DB_USERNAME", "root"),
+		DBPass:                       getenv("DB_PASSWORD", ""),
+		DBName:                       getenv("DB_DATABASE", "openhouse-2025"),
+		GoogleClientID:               getenv("GOOGLE_CLIENT_ID", ""),
+		GoogleClientSecret:           getenv("GOOGLE_CLIENT_SECRET", ""),
+		GoogleRedirectURL:            getenv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/auth/google/callback"),
+		GoogleSheetsRedirectURL:      getenv("GOOGLE_SHEETS_REDIRECT_URL", "http://localhost:8080/api/admin/export/participants/google-sheets/callback"),
+		GoogleSheetsSpreadsheetID:    getenv("GOOGLE_SHEETS_SPREADSHEET_ID", ""),
+		GoogleSheetsTokenFilePath:    getenv("GOOGLE_SHEETS_TOKEN_FILE_PATH", "token.json"),
+		GoogleSheetsDailyRecapHour:   getenv("GOOGLE_SHEETS_DAILY_RECAP_HOUR", "23"),
+		GoogleSheetsDailyRecapMinute: getenv("GOOGLE_SHEETS_DAILY_RECAP_MINUTE", "59"),
+		CORSOrigins:                  getenv("CORS_ORIGINS", "*"),
+		SMTPHost:                     getenv("SMTP_HOST", ""),
+		SMTPPort:                     getenv("SMTP_PORT", "587"),
+		SMTPUser:                     getenv("SMTP_USER", ""),
+		SMTPPass:                     getenv("SMTP_PASS", ""),
+		SMTPFrom:                     getenv("SMTP_FROM", ""),
+		CSRFAuthKey:                  getenv("CSRF_AUTH_KEY", ""),
 	}
 	log.Printf("config loaded: ENV=%s GIN_MODE=%s HTTP_PORT=%s DB_HOST=%s DB_NAME=%s", cfg.Env, cfg.GinMode, cfg.HTTPPort, cfg.DBHost, cfg.DBName)
 	return cfg
