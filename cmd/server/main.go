@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"openhouse-2025-api/internal/config"
@@ -69,9 +70,19 @@ func runDailyRecapScheduler(cfg *config.Config) {
 		wib, _ := time.LoadLocation("Asia/Jakarta")
 		nowWIB := now.In(wib)
 
-		nextRun := time.Date(nowWIB.Year(), nowWIB.Month(), nowWIB.Day(), cfg.GoogleSheetsDailyRecapHour, cfg.GoogleSheetsDailyRecapMinute, 0, 0, wib)
+		recapHour, err := strconv.Atoi(cfg.GoogleSheetsDailyRecapHour)
+		if err != nil {
+			recapHour = 23
+		}
+
+		recapMinute, err := strconv.Atoi(cfg.GoogleSheetsDailyRecapMinute)
+		if err != nil {
+			recapMinute = 59
+		}
+
+		nextRun := time.Date(nowWIB.Year(), nowWIB.Month(), nowWIB.Day(), recapHour, recapMinute, 0, 0, wib)
 		if nowWIB.After(nextRun) {
-			// If it's already past 11:59 PM today, schedule for tomorrow
+			// If it's already past the recap time today, schedule for tomorrow
 			nextRun = nextRun.Add(24 * time.Hour)
 		}
 
