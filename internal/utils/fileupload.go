@@ -20,7 +20,7 @@ type FileUploadResult struct {
 
 var AllowedImageTypes = []string{".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
-var AllowedPaymentTypes = []string{".jpg", ".jpeg", ".png", ".pdf"}
+var AllowedPaymentTypes = []string{".jpg", ".jpeg", ".png"}
 
 func ValidateImageFile(header *multipart.FileHeader) error {
 	ext := strings.ToLower(filepath.Ext(header.Filename))
