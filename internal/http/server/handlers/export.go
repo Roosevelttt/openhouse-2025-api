@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"openhouse-2025-api/internal/config"
@@ -27,14 +28,27 @@ func NewExportHandler(exportSvc *services.ExportService, dailyRecapSvc *services
 }
 
 func (h *ExportHandler) ExportParticipants(c *gin.Context) {
-	buffer, err := h.exportSvc.GenerateParticipantsExcel(c.Request.Context(), c.GetString("admin_division_slug"), c.GetString("admin_ukm_id"))
+	dailyReport := c.Query("daily") != "false"
+
+	var buffer *bytes.Buffer
+	var err error
+
+	if dailyReport {
+		buffer, err = h.exportSvc.GenerateDailyParticipantsExcel(c.Request.Context(), c.GetString("admin_division_slug"), c.GetString("admin_ukm_id"))
+	} else {
+		buffer, err = h.exportSvc.GenerateParticipantsExcel(c.Request.Context(), c.GetString("admin_division_slug"), c.GetString("admin_ukm_id"))
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate Excel file"})
 		return
 	}
 
-	// Set the correct headers for a file download
-	fileName := fmt.Sprintf("participants_export_%s.xlsx", time.Now().Format("2006-01-02"))
+	fileName := fmt.Sprintf("participants_export_%s.xlsx", time.Now().In(h.exportSvc.GetTimezone()).Format("2006-01-02"))
+	if dailyReport {
+		fileName = fmt.Sprintf("daily_participants_export_%s.xlsx", time.Now().In(h.exportSvc.GetTimezone()).Format("2006-01-02"))
+	}
+
 	c.Header("Content-Description", "File Transfer")
 	c.Header("Content-Disposition", "attachment; filename="+fileName)
 	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer.Bytes())
