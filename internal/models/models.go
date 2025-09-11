@@ -77,6 +77,7 @@ type Participant struct {
 	FileValidated    int        `gorm:"column:file_validated" db:"file_validated" json:"file_validated"`
 	PaymentValidated int        `db:"payment_validated" json:"payment_validated"`
 	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
+	RegisteredAt     *string    `db:"-" json:"registered_at,omitempty"` // New field for Asia/Jakarta timestamp
 }
 
 type SlotReservation struct {

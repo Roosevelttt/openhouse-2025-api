@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"openhouse-2025-api/internal/models"
 )
@@ -55,6 +56,18 @@ func (r *ParticipantsRepository) List(ctx context.Context, adminDivisionSlug str
 		); err != nil {
 			return nil, err
 		}
+
+		if p.CreatedAt != nil {
+			jakartaLoc, err := time.LoadLocation("Asia/Jakarta")
+			if err != nil {
+				jakartaLoc = time.UTC
+			}
+
+			jakartaTime := p.CreatedAt.In(jakartaLoc)
+			formattedTime := jakartaTime.Format("02-Jan-2006 15:04:05")
+			p.RegisteredAt = &formattedTime
+		}
+
 		res = append(res, p)
 	}
 	return res, rows.Err()
