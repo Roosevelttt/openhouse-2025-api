@@ -94,12 +94,25 @@ func (s *AuthService) OAuthCallback(c *gin.Context) {
 				session.Set("admin_division_slug", nil)
 			}
 		} else {
-			// Regular user - create/update user record in database
-			userModel := &models.User{
-				NRP:    nrp,
-				Name:   user.Name, // Get name from Google OAuth
-				LineID: "",        // Will be empty initially, user can update later
-				Phone:  "",        // Will be empty initially, user can update later
+			// Regular user
+			existingUser, err := s.users.FindByNRP(c.Request.Context(), nrp)
+			var userModel *models.User
+
+			if err == nil && existingUser != nil {
+				// User exists
+				userModel = &models.User{
+					NRP:    nrp,
+					Name:   user.Name,           
+					LineID: existingUser.LineID, 
+					Phone:  existingUser.Phone,  
+				}
+			} else {
+				userModel = &models.User{
+					NRP:    nrp,
+					Name:   user.Name, // Get name from Google OAuth
+					LineID: "",        // Will be empty initially, user can update later
+					Phone:  "",        // Will be empty initially, user can update later
+				}
 			}
 
 			// Create or update user in database
