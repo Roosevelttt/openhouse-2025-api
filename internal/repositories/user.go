@@ -14,15 +14,10 @@ type UserRepository struct{ db *sql.DB }
 func NewUserRepository(db *sql.DB) *UserRepository { return &UserRepository{db: db} }
 
 func (r *UserRepository) UpsertByNRP(ctx context.Context, u *models.User) error {
-	var existingID string
-	err := r.db.QueryRowContext(ctx, `SELECT id FROM users WHERE nrp=?`, u.NRP).Scan(&existingID)
-
+	// Generate UUID for new user
 	id := uuid.New().String()
-	if err == nil && existingID != "" {
-		id = existingID
-	}
 
-	_, err = r.db.ExecContext(ctx, `INSERT INTO users (id, nrp, name, line_id, phone) VALUES (?,?,?,?,?)
+	_, err := r.db.ExecContext(ctx, `INSERT INTO users (id, nrp, name, line_id, phone) VALUES (?,?,?,?,?)
 		ON DUPLICATE KEY UPDATE name=VALUES(name), line_id=VALUES(line_id), phone=VALUES(phone)`,
 		id, u.NRP, u.Name, u.LineID, u.Phone)
 	return err
