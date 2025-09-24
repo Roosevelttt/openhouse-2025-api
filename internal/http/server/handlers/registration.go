@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"openhouse-2025-api/internal/models"
 	"openhouse-2025-api/internal/repositories"
@@ -25,7 +27,26 @@ func (h *RegistrationHandler) Test(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Registration endpoint is working"})
 }
 
+func (h *RegistrationHandler) isRegistrationClosed() bool {
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Fatalf("Could not load timezone: %v", err)
+	}
+
+	deadline := time.Date(2025, 9, 25, 0, 0, 0, 0, loc)
+	now := time.Now().In(loc)
+
+	return now.After(deadline)
+}
+
 func (h *RegistrationHandler) Create(c *gin.Context) {
+	if h.isRegistrationClosed() {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Registration is closed.",
+		})
+		return
+	}
+
 	// Parse form data
 	err := c.Request.ParseMultipartForm(10 << 20) // 10MB max
 	if err != nil {

@@ -26,6 +26,18 @@ func NewParticipantsHandler(s *services.ParticipantsService, regRepo *repositori
 	}
 }
 
+func (h *ParticipantsHandler) isRegistrationClosed() bool {
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Fatalf("Could not load timezone: %v", err)
+	}
+
+	deadline := time.Date(2025, 9, 25, 0, 0, 0, 0, loc)
+	now := time.Now().In(loc)
+
+	return now.After(deadline)
+}
+
 func (h *ParticipantsHandler) List(c *gin.Context) {
 	log.Printf("=== ParticipantsHandler.List called ===")
 	log.Printf("Admin NRP from context: %v", c.GetString("admin_nrp"))
@@ -46,6 +58,13 @@ func (h *ParticipantsHandler) List(c *gin.Context) {
 
 // ReserveSlot reserves a slot for registration
 func (h *ParticipantsHandler) ReserveSlot(c *gin.Context) {
+	if h.isRegistrationClosed() {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Registration is closed.",
+		})
+		return
+	}
+
 	var req models.ReserveSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -73,6 +92,13 @@ func (h *ParticipantsHandler) ReserveSlot(c *gin.Context) {
 
 // RegisterWithReservation creates registration using a reservation
 func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
+	if h.isRegistrationClosed() {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Registration is closed.",
+		})
+		return
+	}
+
 	reservationID := c.Param("reservationId")
 	if reservationID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Reservation ID is required"})
@@ -144,6 +170,14 @@ func (h *ParticipantsHandler) RegisterWithReservation(c *gin.Context) {
 
 // AccessPaymentPage handles when user tries to access payment page
 func (h *ParticipantsHandler) AccessPaymentPage(c *gin.Context) {
+	if h.isRegistrationClosed() {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Registration is closed.",
+		})
+		return
+	}
+
 	nrp := c.GetString("user_nrp")
 	if nrp == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
